@@ -1,4 +1,4 @@
-#include "server.h"
+#include "server_szkielet.h"
 #include <Winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
