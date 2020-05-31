@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-#define PORT 1337
+#define PORT "1337"
 #define MAX_PLAYERS 20
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -61,7 +61,7 @@ ShooterServer_t* create_server() {
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE;
 
-	if (getaddrinfo(NULL, "1337", &hints, &addrInfo) != 0) {
+	if (getaddrinfo(NULL, PORT, &hints, &addrInfo) != 0) {
 		free(srv);
 		return NULL;
 	}
