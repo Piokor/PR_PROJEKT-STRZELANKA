@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
 
 	Cord c = { 350, 350 };
 	Player* mainPlayer = initPlayer(" ", 0, c, 0, al_map_rgb(100, 0, 0));
-	c = { 100, 100 };
+	c = (Cord){ 100, 100 };
 	Player* debil = initPlayer(" ", 0, c, 0, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
@@ -278,7 +278,6 @@ int main(int argc, char* argv[]) {
 				break;
 			case ALLEGRO_KEY_UP:
 				keys[UP] = 1;
-				printf("UP");
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = 1;
