@@ -87,18 +87,22 @@ ListElem_t* insert_end(ListHandle_t* list, void* data) {
 }
 
 
-void remove_elem(ListHandle_t* list, ListElem_t* elem) {
+ListElem_t* remove_elem(ListHandle_t* list, ListElem_t* elem) {
+	ListElem_t* nextElem = elem->next;
+
 	if (list->head == elem) {
 		remove_head(list)->head;
 	}
 	else {
-		elem->prev->next = elem->next;
+		elem->prev->next = nextElem;
 		if (elem->next != NULL) {
-			elem->next->prev = elem->prev;
+			nextElem->prev = elem->prev;
 		}
 		free_elem(list, elem);
 	}
 	list->elementAmount -= 1;
+
+	return nextElem;
 }
 
 
