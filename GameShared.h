@@ -27,8 +27,15 @@
 
 #define SCOREBOARD_SIZE_X 100
 
+#define AMT_OF_REPSAWN_CORDS 8
+#define IMMORTAL_TIME 2
+
 #define POINTS_FOR_KILL 10
 #define BULLET_DAMAGE 0.25
+
+#define FONT_SIZE 20
+#define FPS 60
+
 
 struct ALLEGRO_COLOR;
 
@@ -46,6 +53,7 @@ typedef struct Player{
 	float angle;
 	struct ALLEGRO_COLOR color;
 	float health;
+	double immortalTime;
 }Player_t;
 
 
@@ -80,6 +88,18 @@ Board_t* init_board();
 Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter);
 Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
 BoardPacked_t* pack_board(Board_t* board);
+
+
+static Cord spawnCords[AMT_OF_REPSAWN_CORDS] = {
+										{PLAYER_SIZE + BOARD_SIZE_X / 10, PLAYER_SIZE + BOARD_SIZE_Y / 10},
+										{BOARD_SIZE_X / 2, PLAYER_SIZE + BOARD_SIZE_Y / 10},
+										{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10, PLAYER_SIZE + BOARD_SIZE_Y / 10},
+										{PLAYER_SIZE + BOARD_SIZE_X / 10, BOARD_SIZE_Y / 2},
+										{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10, BOARD_SIZE_Y / 2},
+										{PLAYER_SIZE + BOARD_SIZE_X / 10, BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10},
+										{BOARD_SIZE_X / 2, BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10},
+										{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10, BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10}
+};
 
 
 #endif

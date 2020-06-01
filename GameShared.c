@@ -34,6 +34,7 @@ Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
 	p->position = position;
 	p->color = color;
 	p->health = 1;
+	p->immortalTime = 0;
 
 	return p;
 }
