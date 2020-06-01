@@ -2,51 +2,55 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
-#include "Game.h"
-
-int main() {
-	return 0;
-}
-/*
+#include "ServerGame.h"
+#include "BulletList.h"
+#include "PlayerList.h"
 
 //funkcyjka do narysowania jednego gracza
 //do zrobienia rysowanie nicku
 //KLIENT
-void drawPlayer(Player* player) {
+void drawPlayer(Player_t* player) {
 	//rysowanie koła
-	al_draw_filled_circle(player->posiotion.x, player->posiotion.y, PLAYER_SIZE, player->color);
+	al_draw_filled_circle(player->position.x, player->position.y, PLAYER_SIZE, player->color);
 	//twarda matma here - rysowanie strzaleczki
-	al_draw_filled_triangle(player->posiotion.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->posiotion.y + (PLAYER_SIZE / 5) * cos(-player->angle),
-		player->posiotion.x + (PLAYER_SIZE * 6 / 7) * sin(-player->angle + M_PI * 45 / 180), player->posiotion.y + (PLAYER_SIZE * 6 / 7) * cos(-player->angle + M_PI * 45 / 180),
-		player->posiotion.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->posiotion.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
-	al_draw_filled_triangle(player->posiotion.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->posiotion.y + (PLAYER_SIZE / 5) * cos(-player->angle),
-		player->posiotion.x - (PLAYER_SIZE * 6 / 7) * sin(player->angle + M_PI * 45 / 180), player->posiotion.y + (PLAYER_SIZE * 6 / 7) * cos(player->angle + M_PI * 45 / 180),
-		player->posiotion.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->posiotion.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
+	al_draw_filled_triangle(player->position.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->position.y + (PLAYER_SIZE / 5) * cos(-player->angle),
+		player->position.x + (PLAYER_SIZE * 6 / 7) * sin(-player->angle + M_PI * 45 / 180), player->position.y + (PLAYER_SIZE * 6 / 7) * cos(-player->angle + M_PI * 45 / 180),
+		player->position.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->position.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
+	al_draw_filled_triangle(player->position.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->position.y + (PLAYER_SIZE / 5) * cos(-player->angle),
+		player->position.x - (PLAYER_SIZE * 6 / 7) * sin(player->angle + M_PI * 45 / 180), player->position.y + (PLAYER_SIZE * 6 / 7) * cos(player->angle + M_PI * 45 / 180),
+		player->position.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->position.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
 	//rysowanie
 	float hpbarW = 28;
 	float hpbarH = 4;
-	al_draw_filled_rectangle(player->posiotion.x - hpbarW / 2, player->posiotion.y - PLAYER_SIZE - 5 - hpbarH, player->posiotion.x + hpbarW / 2, player->posiotion.y - PLAYER_SIZE - 5, al_map_rgb(0, 0, 0));
-	al_draw_filled_rectangle(player->posiotion.x - hpbarW / 2, player->posiotion.y - PLAYER_SIZE - 5 - hpbarH, player->posiotion.x - hpbarW / 2 + hpbarW * player->health, player->posiotion.y - PLAYER_SIZE - 5, al_map_rgb(0, 200, 0));
+	al_draw_filled_rectangle(player->position.x - hpbarW / 2, player->position.y - PLAYER_SIZE - 5 - hpbarH, player->position.x + hpbarW / 2, player->position.y - PLAYER_SIZE - 5, al_map_rgb(0, 0, 0));
+	al_draw_filled_rectangle(player->position.x - hpbarW / 2, player->position.y - PLAYER_SIZE - 5 - hpbarH, player->position.x - hpbarW / 2 + hpbarW * player->health, player->position.y - PLAYER_SIZE - 5, al_map_rgb(0, 200, 0));
 
 }
 
 //funkcja do rysowanja pociskow
 //KLIENT
-void drawBullet(Bullet* bullet) {
-	al_draw_filled_circle(bullet->posiotion.x, bullet->posiotion.y, BULLET_SIZE, al_map_rgb(0, 0, 0));
+void drawBullet(Bullet_t* bullet) {
+	al_draw_filled_circle(bullet->position.x, bullet->position.y, BULLET_SIZE, al_map_rgb(0, 0, 0));
 }
 
 //funkcyjka do rysowania calej planszy
 //tutaj jeszcze trzeba bedzie dodac scoreboard i pociski itd
 //KLIENT
-void drawBoard(Board* board) {
+void drawBoard(Board_t* board) {
 	al_clear_to_color(al_map_rgb(20, 80, 150));
-	for (int i = 0; i < board->playersAmt; i++) {
-		drawPlayer(board->players[i]);
+
+	ListElem_t* currElem = board->players->head;
+	while (currElem != NULL) {
+		drawPlayer((Player_t*)(currElem->data));
+		currElem = currElem->next;
 	}
-	for (int i = 0; i < board->bulletAmt; i++) {
-		drawBullet(board->bullets[i]);
+
+	currElem = board->bullets->head;
+	while (currElem != NULL) {
+		drawPlayer((Bullet_t*)(currElem->data));
+		currElem = currElem->next;
 	}
+
 	al_flip_display();
 }
 
@@ -89,14 +93,14 @@ int main(int argc, char* argv[]) {
 	al_clear_to_color(al_map_rgb(20, 80, 150));
 
 	Cord c = { 350, 350 };
-	Player* mainPlayer = initPlayer(" ", 0, c, 0, al_map_rgb(100, 0, 0));
+	Player_t* mainPlayer = initPlayer(" ", 0, c, 0, al_map_rgb(100, 0, 0));
 	c = (Cord){ 100, 100 };
-	Player* debil = initPlayer(" ", 0, c, 0, al_map_rgb(0, 100, 0));
+	Player_t* debil = initPlayer(" ", 0, c, 0, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
 	bool keys[4] = { 0,0,0,0 };
 
-	Board* board = initBoard();
+	Board_t* board = initBoard();
 	addPlayer(mainPlayer, board);
 	addPlayer(debil, board);
 
@@ -108,8 +112,8 @@ int main(int argc, char* argv[]) {
 		// to tutaj jest do zmiany - obliczenia beda wykonywane po stronie servera, a po kazdym evencie bedzie wysyłany sygnal
 		// to jest wersja testowa w sumie
 		if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
-			float x = event.mouse.x - mainPlayer->posiotion.x;
-			float y = event.mouse.y - mainPlayer->posiotion.y;
+			float x = event.mouse.x - mainPlayer->position.x;
+			float y = event.mouse.y - mainPlayer->position.y;
 			float poprawka = M_PI;
 			if (x >= 0) poprawka = 0;
 			float angle = atan(y / x) + M_PI / 2 + poprawka; //no obliczenia cos nie wyszły, ale jakos sie załatalo
@@ -158,13 +162,13 @@ int main(int argc, char* argv[]) {
 			updateBullets(board);
 			checkColisions(board);
 			if (keys[LEFT])
-				mainPlayer->posiotion.x -= PLAYER_SPEED;
+				mainPlayer->position.x -= PLAYER_SPEED;
 			if (keys[RIGHT])
-				mainPlayer->posiotion.x += PLAYER_SPEED;
+				mainPlayer->position.x += PLAYER_SPEED;
 			if (keys[DOWN])
-				mainPlayer->posiotion.y += PLAYER_SPEED;
+				mainPlayer->position.y += PLAYER_SPEED;
 			if (keys[UP])
-				mainPlayer->posiotion.y -= PLAYER_SPEED;
+				mainPlayer->position.y -= PLAYER_SPEED;
 		}
 	}
 
@@ -172,4 +176,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-*/

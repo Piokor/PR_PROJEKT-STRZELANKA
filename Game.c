@@ -1,11 +1,9 @@
-#include <string.h>
-#include "Game.h"
 #include "BulletList.h"
 #include "PlayerList.h"
+#include "Game.h"
 
-
-Board* init_board() {
-	Board* board = (Board*)malloc(sizeof(Board));
+Board_t* init_board() {
+	Board_t* board = (Board_t*)malloc(sizeof(Board_t));
 
 	board->players = init_list_handle_player();
 	board->bullets = init_list_handle_bullet();
@@ -14,8 +12,8 @@ Board* init_board() {
 }
 
 
-Bullet* init_bullet(Cord position, float angle, Player* shooter) {
-	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
+Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter) {
+	Bullet_t* b = (Bullet_t*)malloc(sizeof(Bullet_t));
 	b->position = position;
 	b->angle = angle;
 	b->shooter = shooter;
@@ -23,8 +21,8 @@ Bullet* init_bullet(Cord position, float angle, Player* shooter) {
 }
 
 
-Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
-	Player* p = (Player*)calloc(1, sizeof(Player));  // inicjuje zerami - nie trzeba ustawiaæ score i angle na zero
+Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
+	Player_t* p = (Player_t*)calloc(1, sizeof(Player_t));  // inicjuje zerami - nie trzeba ustawiaæ score i angle na zero
 
 	int i = 0;
 	char c = nick[0];
@@ -41,10 +39,10 @@ Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
 }
 
 
-BoardPacked_t* pack_board(Board* board) {
+BoardPacked_t* pack_board(Board_t* board) {
 	BoardPacked_t* boardPacked = (BoardPacked_t*)malloc(sizeof(BoardPacked_t));
 	BulletPacked_t* packedBullets = pack_bullet_list(board->bullets);
-	Player* packedPlayers = pack_player_list(board->players);
+	Player_t* packedPlayers = pack_player_list(board->players);
 
 	boardPacked->bulletsPacked = *packedBullets;
 	boardPacked->playersPacked = *packedPlayers;

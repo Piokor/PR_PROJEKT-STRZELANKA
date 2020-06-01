@@ -4,13 +4,13 @@
 #include "ServerGame.h"
 
 
-void update_bullets(Board* board) {
+void update_bullets(Board_t* board) {
 	float x, y;
 	ListElem_t* bulletElem = board->bullets->head;
-	Bullet* bullet = NULL;
+	Bullet_t* bullet = NULL;
 
 	while (bulletElem != NULL) {
-		bullet = (Bullet*)(bulletElem->data);
+		bullet = (Bullet_t*)(bulletElem->data);
 		x = sin(bullet->angle) * BULLET_SPEED;
 		y = cos(bullet->angle) * BULLET_SPEED;
 		bullet->position.x += x;
@@ -25,17 +25,17 @@ void update_bullets(Board* board) {
 }
 
 
-void check_colisions(Board* board) {
+void check_colisions(Board_t* board) {
 	ListElem_t* bulletElem, *playerElem = board->players->head;
-	Bullet* bullet = NULL;
-	Player* player = NULL;
+	Bullet_t* bullet = NULL;
+	Player_t* player = NULL;
 	float distance = 0.0;
 
 	while (playerElem != NULL) {
-		player = (Player*)playerElem->data;
+		player = (Player_t*)playerElem->data;
 		bulletElem = board->bullets->head;
 		while (bulletElem != NULL) {
-			bullet = (Bullet*)bulletElem->data;
+			bullet = (Bullet_t*)bulletElem->data;
 			distance = sqrt(pow(bullet->position.x - player->position.x, 2) + pow(bullet->position.y - player->position.y, 2));  // sodleglosc gracza od pocisku
 			if (distance < PLAYER_SIZE + BULLET_SIZE) {
 				player->health -= BULLET_DAMAGE;
@@ -53,8 +53,8 @@ void check_colisions(Board* board) {
 }
 
 
-void shoot(Player* shooter, Board* board){
-	Bullet* bullet = init_bullet(shooter->position, M_PI - shooter->angle, shooter);
+void shoot(Player_t* shooter, Board_t* board){
+	Bullet_t* bullet = init_bullet(shooter->position, M_PI - shooter->angle, shooter);
 
 	bullet->position.x += sin(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);
 	bullet->position.y += cos(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);

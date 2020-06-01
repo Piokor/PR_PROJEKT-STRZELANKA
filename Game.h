@@ -45,33 +45,40 @@ typedef struct Player{
 	float angle;
 	ALLEGRO_COLOR color;
 	float health;
-}Player;
+}Player_t;
 
 
 typedef struct Bullet{
 	Cord position;
 	float angle;
-	Player* shooter;
-}Bullet;
+	Player_t* shooter;
+}Bullet_t;
+
+
+typedef struct BulletPacked {
+	Cord position;
+	float angle;
+	struct Player shooter;
+}BulletPacked_t;
 
 
 typedef struct Board{
 	ListHandle_t* players;
 	ListHandle_t* bullets;
-}Board;
+}Board_t;
 
 
 typedef struct BoardPacked{
-	Player playersPacked;
-	BulletPacked_t bulletsPacked;
+	Player_t playersPacked;
+	struct BulletPacked bulletsPacked;
 	unsigned bytes;
 }BoardPacked_t;
 
 
-Board* init_board();
-Bullet* init_bullet(Cord position, float angle, Player* shooter);
-Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
-BoardPacked_t* pack_board(Board* board);
+Board_t* init_board();
+Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter);
+Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
+BoardPacked_t* pack_board(Board_t* board);
 
 
 #endif
