@@ -67,3 +67,8 @@ void draw_board(Board_t* board, ALLEGRO_FONT* font) {
 
 	al_flip_display();
 }
+
+
+void unpack_board() {
+
+}
