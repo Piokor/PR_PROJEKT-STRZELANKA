@@ -7,6 +7,7 @@
 
 
 typedef struct SrvGameData {
+	Board* srvBoard;
 	HANDLE boardMutex;
 }SrvGameData_t;
 

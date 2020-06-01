@@ -92,56 +92,6 @@ void shoot(Player* player, Board* board) {
 	addBullet(bullet, board);
 }
 
-//SERVER
-void destroyBullet(int i, Board* board) {
-	board->bulletAmt--;
-	free(board->bullets[i]);
-	if (i != board->bulletAmt)
-		board->bullets[i] = board->bullets[board->bulletAmt];
-}
-
-//SERVER
-void updateBullets(Board* board) {
-	for (int i = 0; i < board->bulletAmt; i++) {
-		float x = sin(board->bullets[i]->angle) * BULLET_SPEED;
-		float y = cos(board->bullets[i]->angle) * BULLET_SPEED;
-		board->bullets[i]->posiotion.x += x;
-		board->bullets[i]->posiotion.y += y;
-		//usuniecie pocisku jesli wyjechal poza plansze
-		if (board->bullets[i]->posiotion.x < 0 || board->bullets[i]->posiotion.y < 0 || board->bullets[i]->posiotion.x > BOARD_SIZE_X || board->bullets[i]->posiotion.y > BOARD_SIZE_Y) {
-			destroyBullet(i, board);
-		}
-	}
-}
-
-//SERVER
-void destroyPlayer(int i, Board* board) {
-	board->playersAmt--;
-	free(board->players[i]);
-	if (i != board->playersAmt)
-		board->players[i] = board->players[board->playersAmt];
-}
-
-//SERVER
-void checkColisions(Board* board) {
-	for (int ip = 0; ip < board->playersAmt; ip++) {
-		for (int ib = 0; ib < board->bulletAmt; ib++) {
-			float d = sqrt(pow(board->bullets[ib]->posiotion.x - board->players[ip]->posiotion.x, 2) + pow(board->bullets[ib]->posiotion.y - board->players[ip]->posiotion.y, 2)); //odleglosc gracza ip od pocisku ib
-			if (d < PLAYER_SIZE + BULLET_SIZE) {
-				board->players[ip]->health -= BULLET_DAMAGE;
-				if (board->players[ip]->health <= 0) {
-					board->bullets[ib]->shooter->score += POINTS_FOR_KILL;
-					destroyBullet(ib, board);
-					destroyPlayer(ip, board);
-					ip = 0;
-					ib = 0; //trzeba przeleciec od nowa, bo gracze i naboje mogli zmienic swoje polozenie w tablicy :<
-				}
-				else
-					destroyBullet(ib, board);
-			}
-		}
-	}
-}
 
 int main(int argc, char* argv[]) {
 
