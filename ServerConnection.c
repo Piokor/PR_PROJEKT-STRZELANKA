@@ -1,11 +1,9 @@
-#include "server_szkielet.h"
+#define _CRT_SECURE_NO_WARNINGS
 #include <Winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
-
-
-#define PORT "1337"
-#define MAX_PLAYERS 20
+#include "ServerConnection.h"
+#include "Game.h"
 #pragma comment(lib, "Ws2_32.lib")
 
 
@@ -16,28 +14,38 @@ void server_critical_error() {
 
 DWORD WINAPI _srv_start_player_thread_rcv(LPVOID params) {
 	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
-
+	char buf[256];
+	while (recv(playerConn->socket, buf, sizeof(buf), 0) > 0) {
+		printf("\n%s\n", buf);
+	}
+	return TRUE;
 }
 
 
 DWORD WINAPI _srv_start_player_thread_snd(LPVOID params) {
 	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
-
+	char msg[] = "Siema eniu!";
+	int read = 0;
+	for (;;) {
+		Sleep(3500);
+		send(playerConn->socket, msg, sizeof(msg), 0);
+	}
+	return TRUE;
 }
 
 
 DWORD WINAPI _srv_start_main_thread(LPVOID params) {
 	ShooterServer_t* srv = (ShooterServer_t*)params;
-	if (bind(srv->srvInfo.srvSocket, srv->srvInfo.addrInfo->ai_addr, (int)srv->srvInfo.addrInfo->ai_addrlen) == SOCKET_ERROR ||
-		listen(srv->srvInfo.srvSocket, MAX_PLAYERS) == SOCKET_ERROR) {
-		shutdown(srv->srvInfo.srvSocket, SD_BOTH);
+	if (bind(srv->srvInfo.socket, srv->srvInfo.addrInfo->ai_addr, (int)srv->srvInfo.addrInfo->ai_addrlen) == SOCKET_ERROR ||
+		listen(srv->srvInfo.socket, PLAYERS_LIMIT) == SOCKET_ERROR) {
+		shutdown(srv->srvInfo.socket, SD_BOTH);
 		return FALSE;
 	}
 
 	for (;;) {
 		SrvConnInfo_t* newPlayerConn = &((srv->playerConnections)[(srv->connectedPlayers)++]);
-		newPlayerConn->srvSocket = accept(srv->srvInfo.srvSocket, 
-			newPlayerConn->addrInfo->ai_addr, newPlayerConn->addrInfo->ai_addrlen);
+		newPlayerConn->socket = accept(srv->srvInfo.socket, 
+			newPlayerConn->addrInfo->ai_addr, &(newPlayerConn->addrInfo->ai_addrlen));
 		newPlayerConn->threads.threadRecv = CreateThread(NULL, 0,
 			(LPTHREAD_START_ROUTINE)_srv_start_player_thread_rcv, (LPVOID)newPlayerConn, 0, NULL);
 		newPlayerConn->threads.threadSnd = CreateThread(NULL, 0,
@@ -73,8 +81,8 @@ ShooterServer_t* create_server() {
 	}
 
 	srv->srvInfo.addrInfo = addrInfo;
-	srv->srvInfo.srvSocket = mainRecSocket;
-	srv->playerConnections = (SrvConnInfo_t*)malloc(sizeof(SrvConnInfo_t) * MAX_PLAYERS);
+	srv->srvInfo.socket = mainRecSocket;
+	srv->playerConnections = (SrvConnInfo_t*)malloc(sizeof(SrvConnInfo_t) * PLAYERS_LIMIT);
 	srv->connectedPlayers = 0;
 	return srv;
 }

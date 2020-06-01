@@ -2,58 +2,8 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
-#define M_PI 3.14159265358979323846
+#include "Game.h"
 
-#define PLAYER_SIZE 30
-#define PLAYER_SPEED 2
-#define BULLET_SIZE 3
-#define BULLET_SPEED 10
-
-#define NICK_LEN 15
-
-#define UP 0
-#define DOWN 2
-#define LEFT 3
-#define RIGHT 1
-
-#define PLAYERS_LIMIT 10
-#define BULLETS_LIMIT 30
-
-#define BOARD_SIZE_X 600
-#define BOARD_SIZE_Y 600
-
-#define SCOREBOARD_SIZE_X 100
-
-#define POINTS_FOR_KILL 10
-#define BULLET_DAMAGE 0.25
-
-
-typedef struct {
-	float x;
-	float y;
-} Cord;
-
-typedef struct {
-	char nick[NICK_LEN];
-	int score;
-	Cord posiotion;
-	float angle;
-	ALLEGRO_COLOR color;
-	float health;
-}Player;
-
-typedef struct {
-	Cord posiotion;
-	float angle;
-	Player* shooter;
-}Bullet;
-
-typedef struct {
-	Player** players;
-	int playersAmt;
-	Bullet** bullets;
-	int bulletAmt;
-}Board;
 
 //funkcyjka do narysowania jednego gracza
 //do zrobienia rysowanie nicku
@@ -121,16 +71,6 @@ Bullet* initBullet(Cord position, float angle, Player* shooter) {
 	b->angle = angle;
 	b->shooter = shooter;
 	return b;
-}
-
-//tutaj jest harcodowana ilosc graczy i pocisków mozliwych, moze do zmiany potem nie wiem
-Board* initBoard() {
-	Board* board = (Board*)malloc(sizeof(Board));
-	board->players = (Player**)malloc(PLAYERS_LIMIT * sizeof(Player*));
-	board->playersAmt = 0;
-	board->bullets = (Bullet**)malloc(PLAYERS_LIMIT * sizeof(Bullet*));
-	board->bulletAmt = 0;
-	return board;
 }
 
 void addPlayer(Player* player, Board* board) {
