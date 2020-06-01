@@ -2,9 +2,11 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
+#include "GameShared.h"
 #include "ServerGame.h"
 #include "BulletList.h"
 #include "PlayerList.h"
+
 
 //funkcyjka do narysowania jednego gracza
 //do zrobienia rysowanie nicku
@@ -37,18 +39,23 @@ void drawBullet(Bullet_t* bullet) {
 //tutaj jeszcze trzeba bedzie dodac scoreboard i pociski itd
 //KLIENT
 void drawBoard(Board_t* board) {
+	ListElem_t* currElem;
 	al_clear_to_color(al_map_rgb(20, 80, 150));
 
-	ListElem_t* currElem = board->players->head;
-	while (currElem != NULL) {
-		drawPlayer((Player_t*)(currElem->data));
-		currElem = currElem->next;
+	if (board->players->isAllocated != 0) {
+		currElem = board->players->head;
+		while (currElem != NULL) {
+			drawPlayer((Player_t*)(currElem->data));
+			currElem = currElem->next;
+		}
 	}
 
-	currElem = board->bullets->head;
-	while (currElem != NULL) {
-		drawPlayer((Bullet_t*)(currElem->data));
-		currElem = currElem->next;
+	if (board->bullets->isAllocated != 0) {
+		currElem = board->bullets->head;
+		while (currElem != NULL) {
+			drawBullet((Bullet_t*)(currElem->data));
+			currElem = currElem->next;
+		}
 	}
 
 	al_flip_display();
@@ -93,16 +100,16 @@ int main(int argc, char* argv[]) {
 	al_clear_to_color(al_map_rgb(20, 80, 150));
 
 	Cord c = { 350, 350 };
-	Player_t* mainPlayer = initPlayer(" ", 0, c, 0, al_map_rgb(100, 0, 0));
+	Player_t* mainPlayer = init_player(" ", c, al_map_rgb(100, 0, 0));
 	c = (Cord){ 100, 100 };
-	Player_t* debil = initPlayer(" ", 0, c, 0, al_map_rgb(0, 100, 0));
+	Player_t* debil = init_player(" ", c, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
 	bool keys[4] = { 0,0,0,0 };
 
-	Board_t* board = initBoard();
-	addPlayer(mainPlayer, board);
-	addPlayer(debil, board);
+	Board_t* board = init_board();
+	insert_end(board->players, (void*)mainPlayer);
+	insert_end(board->players, (void*)debil);
 
 	while (running) {
 		ALLEGRO_EVENT event;
@@ -159,8 +166,8 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		if (event.type == ALLEGRO_EVENT_TIMER) {
-			updateBullets(board);
-			checkColisions(board);
+			update_bullets(board);
+			check_colisions(board);
 			if (keys[LEFT])
 				mainPlayer->position.x -= PLAYER_SPEED;
 			if (keys[RIGHT])

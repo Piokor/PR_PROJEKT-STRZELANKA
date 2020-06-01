@@ -1,8 +1,7 @@
-#ifndef PR_GAME_H
-#define PR_GAME_H
+#ifndef PR_GAMESHARED_H
+#define PR_GAMESHARED_H
 
-
-#include <allegro5/allegro.h>
+#include <allegro5/allegro_color.h>
 #include "List.h"
 
 
@@ -31,6 +30,8 @@
 #define POINTS_FOR_KILL 10
 #define BULLET_DAMAGE 0.25
 
+struct ALLEGRO_COLOR;
+
 
 typedef struct Coord {
 	float x;
@@ -43,7 +44,7 @@ typedef struct Player{
 	int score;
 	Cord position;
 	float angle;
-	ALLEGRO_COLOR color;
+	struct ALLEGRO_COLOR color;
 	float health;
 }Player_t;
 

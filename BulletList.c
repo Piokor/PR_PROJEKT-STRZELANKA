@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "List.h"
-#include "Game.h"
+#include "GameShared.h"
 #include "BulletList.h"
 
 

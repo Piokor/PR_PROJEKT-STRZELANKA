@@ -4,7 +4,7 @@
 
 #include <WinSock2.h>
 #include "ServerGame.h"
-#include "Game.h"
+#include "GameShared.h"
 #include "List.h"
 
 

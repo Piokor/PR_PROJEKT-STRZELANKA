@@ -3,7 +3,7 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 #include "ServerConnection.h"
-#include "Game.h"
+#include "GameShared.h"
 #include "List.h"
 #include "PlayerConnectionList.h"
 #include "ServerGame.h"

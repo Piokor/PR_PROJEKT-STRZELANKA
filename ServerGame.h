@@ -2,7 +2,7 @@
 #define PR_SERVERGAME_H
 
 
-#include "Game.h"
+#include "GameShared.h"
 
 
 typedef struct SrvGameData {

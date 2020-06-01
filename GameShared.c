@@ -1,6 +1,6 @@
 #include "BulletList.h"
 #include "PlayerList.h"
-#include "Game.h"
+#include "GameShared.h"
 
 Board_t* init_board() {
 	Board_t* board = (Board_t*)malloc(sizeof(Board_t));

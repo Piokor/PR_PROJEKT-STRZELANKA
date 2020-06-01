@@ -39,8 +39,12 @@ void free_elem(ListHandle_t* list, ListElem_t* elem) {
 
 ListHandle_t* remove_head(ListHandle_t* list) {
 	if (list->isAllocated != 0) {
-		free_elem(list, list->head);
-		list->isAllocated = 0;
+		ListElem_t* oldHead = list->head;
+		list->head = list->head->next;
+		free_elem(list, oldHead);
+		if (list->head == NULL) {
+			list->isAllocated = 0;
+		}
 	}
 	return list;
 }

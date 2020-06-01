@@ -3,7 +3,7 @@
 
 
 #include "List.h"
-#include "Game.h"
+#include "GameShared.h"
 
 
 ListElem_t* find_elem_bullet(ListHandle_t* list, Bullet_t* bullet);

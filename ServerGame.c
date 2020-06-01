@@ -1,25 +1,27 @@
 #include <math.h>
 #include <Winsock.h>
-#include "Game.h"
+#include "GameShared.h"
 #include "ServerGame.h"
 
 
 void update_bullets(Board_t* board) {
-	float x, y;
-	ListElem_t* bulletElem = board->bullets->head;
-	Bullet_t* bullet = NULL;
+	if (board->bullets->isAllocated != 0) {
+		float x, y;
+		ListElem_t* bulletElem = board->bullets->head;
+		Bullet_t* bullet = NULL;
 
-	while (bulletElem != NULL) {
-		bullet = (Bullet_t*)(bulletElem->data);
-		x = sin(bullet->angle) * BULLET_SPEED;
-		y = cos(bullet->angle) * BULLET_SPEED;
-		bullet->position.x += x;
-		bullet->position.y += y;
-		if (bullet->position.x < 0 || bullet->position.y < 0 || bullet->position.x > BOARD_SIZE_X || bullet->position.y > BOARD_SIZE_Y) {
-			bulletElem = remove_elem(board->bullets, bulletElem);
-		}
-		else {
-			bulletElem = bulletElem->next;
+		while (bulletElem != NULL) {
+			bullet = (Bullet_t*)(bulletElem->data);
+			x = sin(bullet->angle) * BULLET_SPEED;
+			y = cos(bullet->angle) * BULLET_SPEED;
+			bullet->position.x += x;
+			bullet->position.y += y;
+			if (bullet->position.x < 0 || bullet->position.y < 0 || bullet->position.x > BOARD_SIZE_X || bullet->position.y > BOARD_SIZE_Y) {
+				bulletElem = remove_elem(board->bullets, bulletElem);
+			}
+			else {
+				bulletElem = bulletElem->next;
+			}
 		}
 	}
 }
@@ -29,12 +31,14 @@ void check_colisions(Board_t* board) {
 	ListElem_t* bulletElem, *playerElem = board->players->head;
 	Bullet_t* bullet = NULL;
 	Player_t* player = NULL;
+	char playerDead = 0;
 	float distance = 0.0;
 
-	while (playerElem != NULL) {
+	while (playerElem != NULL && board->players->isAllocated != 0) {
 		player = (Player_t*)playerElem->data;
+		playerDead = 0;
 		bulletElem = board->bullets->head;
-		while (bulletElem != NULL) {
+		while (bulletElem != NULL && board->bullets->isAllocated != 0) {
 			bullet = (Bullet_t*)bulletElem->data;
 			distance = sqrt(pow(bullet->position.x - player->position.x, 2) + pow(bullet->position.y - player->position.y, 2));  // sodleglosc gracza od pocisku
 			if (distance < PLAYER_SIZE + BULLET_SIZE) {
@@ -42,12 +46,19 @@ void check_colisions(Board_t* board) {
 				if (player->health <= 0) {
 					bullet->shooter->score += POINTS_FOR_KILL;
 					playerElem = remove_elem(board->players, playerElem);
+					playerDead = 1;
 					break;
 				}
 				else {
 					bulletElem = remove_elem(board->bullets, bulletElem);
 				}
 			}
+			else {
+				bulletElem = bulletElem->next;
+			}
+		}
+		if (playerDead == 0) {
+			playerElem = playerElem->next;
 		}
 	}
 }
