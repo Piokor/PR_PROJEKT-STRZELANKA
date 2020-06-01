@@ -1,6 +1,8 @@
 #include <stdio.h>
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_primitives.h>
+#include <allegro5\allegro.h>
+#include <allegro5\allegro_font.h>
+#include <allegro5\allegro_ttf.h>
+#include <allegro5\allegro_primitives.h>
 #include <math.h>
 #define M_PI 3.14159265358979323846
 
@@ -26,6 +28,10 @@
 
 #define POINTS_FOR_KILL 10
 #define BULLET_DAMAGE 0.25
+
+#define FONT_SIZE 20
+
+ALLEGRO_FONT *font;
 
 
 typedef struct {
@@ -58,9 +64,17 @@ typedef struct {
 //funkcyjka do narysowania jednego gracza
 //do zrobienia rysowanie nicku
 //KLIENT
+int nickCorrection(char nick[]) {
+	int ctr = 0;
+	while (nick[ctr] != '\0')
+		ctr++;
+	return FONT_SIZE/(2.3)*ctr / 2;
+}
+
 void drawPlayer(Player* player) {
 	//rysowanie koła
 	al_draw_filled_circle(player->posiotion.x, player->posiotion.y, PLAYER_SIZE, player->color);
+	al_draw_text(font, al_map_rgb(0, 0, 0), player->posiotion.x - nickCorrection(player->nick), player->posiotion.y + PLAYER_SIZE+10, 0, player->nick);
 	//twarda matma here - rysowanie strzaleczki
 	al_draw_filled_triangle(player->posiotion.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->posiotion.y + (PLAYER_SIZE / 5) * cos(-player->angle),
 		player->posiotion.x + (PLAYER_SIZE * 6 / 7) * sin(-player->angle + M_PI * 45 / 180), player->posiotion.y + (PLAYER_SIZE * 6 / 7) * cos(-player->angle + M_PI * 45 / 180),
@@ -107,6 +121,7 @@ Player* initPlayer(const char* nick, int score, Cord position, float angle, ALLE
 		i++;
 		c = nick[i];
 	}
+	p->nick[i] = '\0';
 	p->posiotion = position;
 	p->score = score;
 	p->angle = angle;
@@ -124,6 +139,7 @@ Bullet* initBullet(Cord position, float angle, Player* shooter) {
 }
 
 //tutaj jest harcodowana ilosc graczy i pocisków mozliwych, moze do zmiany potem nie wiem
+
 Board* initBoard() {
 	Board* board = (Board*)malloc(sizeof(Board));
 	board->players = (Player**)malloc(PLAYERS_LIMIT * sizeof(Player*));
@@ -208,7 +224,10 @@ int main(int argc, char* argv[]) {
 	//inicjalizacji w bród
 	ALLEGRO_DISPLAY* display = NULL;
 
+
 	al_init_primitives_addon();
+	al_init_font_addon();
+	al_init_ttf_addon();
 
 	if (!al_init()) {
 		fprintf(stderr, "failed to initialize allegro!\n");
@@ -220,6 +239,9 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "failed to create display!\n");
 		return -1;
 	};
+
+
+	font = al_load_font("data/arial.ttf", FONT_SIZE, NULL);
 
 	const float FPS = 60;
 	ALLEGRO_TIMER* timer = al_create_timer(1.0 / FPS);
@@ -241,9 +263,9 @@ int main(int argc, char* argv[]) {
 	al_clear_to_color(al_map_rgb(20, 80, 150));
 
 	Cord c = { 350, 350 };
-	Player* mainPlayer = initPlayer(" ", 0, c, 0, al_map_rgb(100, 0, 0));
-	c = { 100, 100 };
-	Player* debil = initPlayer(" ", 0, c, 0, al_map_rgb(0, 100, 0));
+	Player* mainPlayer = initPlayer("Nikodem", 0, c, 0, al_map_rgb(100, 0, 0));
+	c = (Cord){ 100, 100 };
+	Player* debil = initPlayer("Jakub", 0, c, 0, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
 	bool keys[4] = { 0,0,0,0 };
