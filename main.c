@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_font.h>
@@ -27,14 +28,13 @@
 #define AMT_OF_REPSAWN_CORDS 8
 #define IMMORTAL_TIME 2
 
-#define SCOREBOARD_SIZE_X 100
-
 #define POINTS_FOR_KILL 10
 #define BULLET_DAMAGE 0.25
 
 #define FONT_SIZE 20
 
 ALLEGRO_FONT *font;
+
 
 
 typedef struct {
@@ -78,9 +78,13 @@ int nickCorrection(char nick[]) {
 }
 
 void drawPlayer(Player* player) {
+	//zamiana inta na stringa
+	char *scoreConverted[10];
+	sprintf(scoreConverted, "%d", player->score);
 	//rysowanie koła
 	al_draw_filled_circle(player->posiotion.x, player->posiotion.y, PLAYER_SIZE, player->color);
-	al_draw_text(font, al_map_rgb(0, 0, 0), player->posiotion.x - nickCorrection(player->nick), player->posiotion.y + PLAYER_SIZE+10, 0, player->nick);
+	al_draw_text(font, al_map_rgb(0, 0, 0), player->posiotion.x - nickCorrection(player->nick), player->posiotion.y + PLAYER_SIZE+5, 0, player->nick);
+	al_draw_text(font, al_map_rgb(0, 0, 0), player->posiotion.x - nickCorrection(scoreConverted), player->posiotion.y + PLAYER_SIZE+30, 0, scoreConverted);
 	//twarda matma here - rysowanie strzaleczki
 	al_draw_filled_triangle(player->posiotion.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->posiotion.y + (PLAYER_SIZE / 5) * cos(-player->angle),
 		player->posiotion.x + (PLAYER_SIZE * 6 / 7) * sin(-player->angle + M_PI * 45 / 180), player->posiotion.y + (PLAYER_SIZE * 6 / 7) * cos(-player->angle + M_PI * 45 / 180),
@@ -195,6 +199,7 @@ void updateImmortalTimers(Board * board) {
 	}
 }
 
+
 //SERVER
 void updateBullets(Board* board) {
 	for (int i = 0; i < board->bulletAmt; i++) {
@@ -253,7 +258,7 @@ int main(int argc, char* argv[]) {
 
 	//inicjalizacji w bród
 	ALLEGRO_DISPLAY* display = NULL;
-
+	srand(time(NULL));
 
 	al_init_primitives_addon();
 	al_init_font_addon();
@@ -291,8 +296,8 @@ int main(int argc, char* argv[]) {
 	//koniec inicjalizacji
 
 	al_clear_to_color(al_map_rgb(20, 80, 150));
-	Player* mainPlayer = initPlayer("Nikodem", 0, spawnCords[7], 0, al_map_rgb(100, 0, 0));
-	Player* debil = initPlayer("Jakub", 0, spawnCords[1], 0, al_map_rgb(0, 100, 0));
+	Player* mainPlayer = initPlayer("Nikodem", 0, spawnCords[rand()%AMT_OF_REPSAWN_CORDS], 0, al_map_rgb(100, 0, 0));
+	Player* debil = initPlayer("Jakub", 0, spawnCords[rand() % AMT_OF_REPSAWN_CORDS], 0, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
 	bool keys[4] = { 0,0,0,0 };
