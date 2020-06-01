@@ -24,6 +24,9 @@
 #define BOARD_SIZE_X 600
 #define BOARD_SIZE_Y 600
 
+#define AMT_OF_REPSAWN_CORDS 8
+#define IMMORTAL_TIME 2
+
 #define SCOREBOARD_SIZE_X 100
 
 #define POINTS_FOR_KILL 10
@@ -37,7 +40,9 @@ ALLEGRO_FONT *font;
 typedef struct {
 	float x;
 	float y;
-} Cord;
+}Cord; Cord spawnCords[AMT_OF_REPSAWN_CORDS] = { {PLAYER_SIZE + BOARD_SIZE_X / 10,PLAYER_SIZE + BOARD_SIZE_Y / 10},{BOARD_SIZE_X / 2,PLAYER_SIZE + BOARD_SIZE_Y / 10},{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10,PLAYER_SIZE + BOARD_SIZE_Y / 10},
+								{PLAYER_SIZE + BOARD_SIZE_X / 10,BOARD_SIZE_Y / 2},{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10,BOARD_SIZE_Y / 2},
+								{PLAYER_SIZE + BOARD_SIZE_X / 10,BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10},{BOARD_SIZE_X / 2,BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10},{BOARD_SIZE_X - PLAYER_SIZE - BOARD_SIZE_X / 10,BOARD_SIZE_Y - PLAYER_SIZE - BOARD_SIZE_Y / 10} };
 
 typedef struct {
 	char nick[NICK_LEN];
@@ -46,6 +51,7 @@ typedef struct {
 	float angle;
 	ALLEGRO_COLOR color;
 	float health;
+	double immortalTime;
 }Player;
 
 typedef struct {
@@ -121,6 +127,7 @@ Player* initPlayer(const char* nick, int score, Cord position, float angle, ALLE
 		i++;
 		c = nick[i];
 	}
+	p->immortalTime = 0;
 	p->nick[i] = '\0';
 	p->posiotion = position;
 	p->score = score;
@@ -176,6 +183,18 @@ void destroyBullet(int i, Board* board) {
 		board->bullets[i] = board->bullets[board->bulletAmt];
 }
 
+//SERVER 
+void updateImmortalTimers(Board * board) {
+	for (int i = 0; i < board->playersAmt; i++) {
+		if (board->players[i]->immortalTime) {
+			board->players[i]->immortalTime = board->players[i]->immortalTime - 0.0166;
+		}
+		if (board->players[i]->immortalTime<0) {
+			board->players[i]->immortalTime = 0;
+		}
+	}
+}
+
 //SERVER
 void updateBullets(Board* board) {
 	for (int i = 0; i < board->bulletAmt; i++) {
@@ -191,6 +210,15 @@ void updateBullets(Board* board) {
 }
 
 //SERVER
+void respawnPlayer(int i, Board *board) {
+	board->players[i]->health = 1.0;
+	int newSpawn = rand() % AMT_OF_REPSAWN_CORDS;
+	board->players[i]->posiotion.x = spawnCords[newSpawn].x;
+	board->players[i]->posiotion.y = spawnCords[newSpawn].y;
+	board->players[i]->immortalTime = IMMORTAL_TIME;
+}
+
+//SERVER
 void destroyPlayer(int i, Board* board) {
 	board->playersAmt--;
 	free(board->players[i]);
@@ -203,12 +231,13 @@ void checkColisions(Board* board) {
 	for (int ip = 0; ip < board->playersAmt; ip++) {
 		for (int ib = 0; ib < board->bulletAmt; ib++) {
 			float d = sqrt(pow(board->bullets[ib]->posiotion.x - board->players[ip]->posiotion.x, 2) + pow(board->bullets[ib]->posiotion.y - board->players[ip]->posiotion.y, 2)); //odleglosc gracza ip od pocisku ib
-			if (d < PLAYER_SIZE + BULLET_SIZE) {
+			if (d < PLAYER_SIZE + BULLET_SIZE && board->players[ip]->immortalTime==0) {
 				board->players[ip]->health -= BULLET_DAMAGE;
 				if (board->players[ip]->health <= 0) {
 					board->bullets[ib]->shooter->score += POINTS_FOR_KILL;
 					destroyBullet(ib, board);
-					destroyPlayer(ip, board);
+					//destroyPlayer(ip, board); stare
+					respawnPlayer(ip, board);
 					ip = 0;
 					ib = 0; //trzeba przeleciec od nowa, bo gracze i naboje mogli zmienic swoje polozenie w tablicy :<
 				}
@@ -218,6 +247,7 @@ void checkColisions(Board* board) {
 		}
 	}
 }
+
 
 int main(int argc, char* argv[]) {
 
@@ -261,11 +291,8 @@ int main(int argc, char* argv[]) {
 	//koniec inicjalizacji
 
 	al_clear_to_color(al_map_rgb(20, 80, 150));
-
-	Cord c = { 350, 350 };
-	Player* mainPlayer = initPlayer("Nikodem", 0, c, 0, al_map_rgb(100, 0, 0));
-	c = (Cord){ 100, 100 };
-	Player* debil = initPlayer("Jakub", 0, c, 0, al_map_rgb(0, 100, 0));
+	Player* mainPlayer = initPlayer("Nikodem", 0, spawnCords[7], 0, al_map_rgb(100, 0, 0));
+	Player* debil = initPlayer("Jakub", 0, spawnCords[1], 0, al_map_rgb(0, 100, 0));
 	float angle = 0;
 	bool running = true;
 	bool keys[4] = { 0,0,0,0 };
@@ -290,7 +317,7 @@ int main(int argc, char* argv[]) {
 			mainPlayer->angle = angle;
 
 		}
-		else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+		else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && mainPlayer->immortalTime==0) {
 			shoot(mainPlayer, board);
 		}
 		else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
@@ -330,6 +357,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		if (event.type == ALLEGRO_EVENT_TIMER) {
+			updateImmortalTimers(board);
 			updateBullets(board);
 			checkColisions(board);
 			if (keys[LEFT])
