@@ -34,6 +34,7 @@
 #define FONT_SIZE 20
 
 ALLEGRO_FONT *font;
+const float FPS = 60;
 
 
 
@@ -191,7 +192,7 @@ void destroyBullet(int i, Board* board) {
 void updateImmortalTimers(Board * board) {
 	for (int i = 0; i < board->playersAmt; i++) {
 		if (board->players[i]->immortalTime) {
-			board->players[i]->immortalTime = board->players[i]->immortalTime - 0.0166;
+			board->players[i]->immortalTime -= (1.0 / FPS);
 		}
 		if (board->players[i]->immortalTime<0) {
 			board->players[i]->immortalTime = 0;
@@ -278,7 +279,6 @@ int main(int argc, char* argv[]) {
 
 	font = al_load_font("data/arial.ttf", FONT_SIZE, NULL);
 
-	const float FPS = 60;
 	ALLEGRO_TIMER* timer = al_create_timer(1.0 / FPS);
 
 	ALLEGRO_EVENT_QUEUE* queue;
