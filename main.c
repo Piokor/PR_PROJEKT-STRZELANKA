@@ -47,52 +47,6 @@ void drawBoard(Board* board) {
 }
 
 
-//funkcja do tworzenia Player*
-Player* initPlayer(const char* nick, int score, Cord position, float angle, ALLEGRO_COLOR color) {
-	Player* p = (Player*)malloc(sizeof(Player));
-	int i = 0;
-	char c = nick[0];
-	while (c != '\0' && i != 15) {
-		p->nick[i] = nick[i];
-		i++;
-		c = nick[i];
-	}
-	p->posiotion = position;
-	p->score = score;
-	p->angle = angle;
-	p->color = color;
-	p->health = 1;
-	return p;
-}
-
-Bullet* initBullet(Cord position, float angle, Player* shooter) {
-	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
-	b->posiotion = position;
-	b->angle = angle;
-	b->shooter = shooter;
-	return b;
-}
-
-void addPlayer(Player* player, Board* board) {
-	board->players[board->playersAmt] = player;
-	board->playersAmt++;
-}
-void addBullet(Bullet* bullet, Board* board) {
-	board->bullets[board->bulletAmt] = bullet;
-	board->bulletAmt++;
-}
-
-void shoot(Player* player, Board* board) {
-	Bullet* bullet = initBullet(player->posiotion, player->angle, player);
-	bullet->angle = M_PI - bullet->angle; //popraweczka znowu bo trygonometria cos nie pykala
-	float x = sin(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);
-	float y = cos(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);
-	bullet->posiotion.x += x;
-	bullet->posiotion.y += y;
-	addBullet(bullet, board);
-}
-
-
 int main(int argc, char* argv[]) {
 
 	//inicjalizacji w bród

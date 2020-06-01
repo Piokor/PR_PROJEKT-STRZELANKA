@@ -49,3 +49,40 @@ void check_colisions(Board* board) {
 		}
 	}
 }
+
+
+Bullet* init_bullet(Cord position, float angle, Player* shooter) {
+	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
+	b->position = position;
+	b->angle = angle;
+	b->shooter = shooter;
+	return b;
+}
+
+
+void shoot(Player* shooter, Board* board){
+	Bullet* bullet = init_bullet(shooter->position, M_PI - shooter->angle, shooter);
+
+	bullet->position.x += sin(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);
+	bullet->position.y += cos(bullet->angle) * (PLAYER_SIZE + BULLET_SIZE + 1);
+
+	insert_end(board->bullets, (void*)bullet);
+}
+
+
+Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
+	Player* p = (Player*)calloc(1, sizeof(Player));  // inicjuje zerami - nie trzeba ustawiaæ score i angle na zero
+
+	int i = 0;
+	char c = nick[0];
+	while (c != '\0' && i != NICK_LEN) {
+		p->nick[i++] = nick[i];
+		c = nick[i];
+	}
+
+	p->position = position;
+	p->color = color;
+	p->health = 1;
+
+	return p;
+}
