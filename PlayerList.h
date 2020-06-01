@@ -6,7 +6,6 @@
 
 
 ListElem_t* find_elem_player(ListHandle_t* list, Player* player);
-Player* find_player(ListHandle_t* list, Player* player);
 ListElem_t* insert_beginning_player(ListHandle_t* list, Player* player);
 ListElem_t* insert_end_player(ListHandle_t* list, Player* player);
 void remove_player(ListHandle_t* list, Player* player);

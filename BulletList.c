@@ -8,12 +8,6 @@ ListElem_t* find_elem_bullet(ListHandle_t* list, Bullet* bullet) {
 	return  find_elem(list, (void*)bullet);
 }
 
-
-Bullet* find_bullet(ListHandle_t* list, Bullet* bullet) {
-	return (Bullet*)(find_elem_bullet(list, bullet)->data);
-}
-
-
 ListElem_t* insert_beginning_bullet(ListHandle_t* list, Bullet* bullet) {
 	return insert_beginning(list, (void*)bullet);
 }

@@ -8,12 +8,6 @@ ListElem_t* find_elem_player(ListHandle_t* list, Player* player) {
 	return  find_elem(list, (void*)player);
 }
 
-
-Player* find_player(ListHandle_t* list, Player* player) {
-	return (Player*)(find_elem_player(list, player)->data);
-}
-
-
 ListElem_t* insert_beginning_player(ListHandle_t* list, Player* player) {
 	return insert_beginning(list, (void*)player);
 }
