@@ -20,7 +20,6 @@
 #define RIGHT 1
 
 #define PLAYERS_LIMIT 10
-#define BULLETS_LIMIT 30
 
 #define BOARD_SIZE_X 600
 #define BOARD_SIZE_Y 600
@@ -78,16 +77,14 @@ typedef struct Board{
 
 
 typedef struct BoardPacked{
-	Player_t playersPacked;
-	struct BulletPacked bulletsPacked;
-	unsigned bytes;
+	unsigned bytes[2];
+	char* data;
 }BoardPacked_t;
 
 
 Board_t* init_board();
 Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter);
 Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
-BoardPacked_t* pack_board(Board_t* board);
 
 
 static Cord spawnCords[AMT_OF_REPSAWN_CORDS] = {

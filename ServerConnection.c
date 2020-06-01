@@ -17,9 +17,15 @@ void server_critical_error() {
 
 DWORD WINAPI _srv_start_thread_rcv(LPVOID params) {
 	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
-	char buf[256];
-	while (recv(playerConn->socket, buf, sizeof(buf), 0) > 0) {
-		printf("\n%s\n", buf);
+	unsigned partNumber, byteSum, bytesToBeReceived[2], bytesReceived = 0;
+	char *data, isReceivingData = 0;
+	while (recv(playerConn->socket, (char*)bytesToBeReceived, sizeof(unsigned) * 2, 0) > 0) {
+		byteSum = bytesToBeReceived[0] + bytesToBeReceived[1];
+		data = (char*)malloc(sizeof(byteSum));
+		bytesReceived = 0;
+		while (bytesReceived != byteSum) {
+			bytesReceived += recv(playerConn->socket, data + bytesReceived, byteSum - bytesReceived, 0);
+		}
 	}
 	return TRUE;
 }
@@ -41,7 +47,8 @@ DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
 		currConnection = srv->playerConnections->head;
 		while (currConnection != NULL) {
 			connInfo = (SrvConnInfo_t*)(currConnection->data);
-			send(connInfo->socket, (char*)dataToSend, dataToSend->bytes, 0);
+			send(connInfo->socket, (char*)(dataToSend->bytes), sizeof(unsigned) * 2, 0);
+			send(connInfo->socket, (char*)(dataToSend->data), (dataToSend->bytes)[0] + (dataToSend->bytes)[1], 0);
 			currConnection = currConnection->next;
 		}
 	}
@@ -86,7 +93,7 @@ ShooterServer_t* create_server() {
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE;
 
-	if (getaddrinfo(NULL, PORT, &hints, &addrInfo) != 0) {
+	if (getaddrinfo(NULL, SRVPORT, &hints, &addrInfo) != 0) {
 		free(srv);
 		return NULL;
 	}

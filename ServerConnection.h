@@ -8,7 +8,7 @@
 #include "List.h"
 
 
-#define PORT "1337"
+#define SRVPORT "1337"
 
 
 typedef struct SrvThreads {

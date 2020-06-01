@@ -5,94 +5,51 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_primitives.h>
 #include <math.h>
+#include <Winsock2.h>
 #include "GameShared.h"
 #include "ServerGame.h"
 #include "BulletList.h"
+#include "ClientGame.h"
 #include "PlayerList.h"
 
 
-int nickCorrection(char nick[]) {
-	int ctr = 0;
-	while (nick[ctr] != '\0')
-		ctr++;
-	return FONT_SIZE / (2.3)*ctr / 2;
-}
+/*typedef struct {
+	char* nick;
+	ALLEGRO_EVENT event;
+} Message;
 
-//SERVER 
-void updateImmortalTimers(Board_t* board) {
-	if (board->players->isAllocated != 0) {
-		ListElem_t* currElem = board->players->head;
-		Player_t* player = NULL;
-		while (currElem != NULL) {
-			player = (Player_t*)(currElem->data);
-			if (player->immortalTime > 0) {
-				player->immortalTime -= (1.0 / FPS);
-			}
-			else if (player->immortalTime < 0) {
-				player->immortalTime = 0;
-			}
+typedef  struct {
+	char* nick;
+	ALLEGRO_EVENT_QUEUE* queue;
+} Klient_dane;
+
+
+void sendMessage(Message message) {};
+
+DWORD WINAPI wysylanie(void* args) {
+	Klient_dane* dane = (Klient_dane*)args;
+	ALLEGRO_EVENT_QUEUE* queue = dane->queue;
+	char* nick = dane->nick;
+
+	bool running = true;
+	while (running) {
+		ALLEGRO_EVENT event;
+
+		al_wait_for_event(queue, &event);
+
+		if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.type == ALLEGRO_KEY_ESCAPE)
+			running = false;
+
+		if (event.type == ALLEGRO_EVENT_MOUSE_AXES || event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || event.type == ALLEGRO_EVENT_KEY_DOWN || event.type == ALLEGRO_EVENT_KEY_UP) {
+			Message message = (Message){ nick, event };
+			sendMessage(message);
 		}
 	}
-}
+}*/
 
-//funkcyjka do narysowania jednego gracza
-//do zrobienia rysowanie nicku
-//KLIENT
-void drawPlayer(Player_t* player, ALLEGRO_FONT* font) {
-	//rysowanie koła
-	al_draw_filled_circle(player->position.x, player->position.y, PLAYER_SIZE, player->color);
-	//zamiana inta na stringa
-	char scoreConverted[10];
-	sprintf(scoreConverted, "%d", player->score);
-	//rysowanie nicku
-	al_draw_text(font, al_map_rgb(0, 0, 0), player->position.x - nickCorrection(player->nick), player->position.y + PLAYER_SIZE + 5, 0, player->nick);
-	al_draw_text(font, al_map_rgb(0, 0, 0), player->position.x - nickCorrection(scoreConverted), player->position.y + PLAYER_SIZE + 30, 0, scoreConverted);
-	//twarda matma here - rysowanie strzaleczki
-	al_draw_filled_triangle(player->position.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->position.y + (PLAYER_SIZE / 5) * cos(-player->angle),
-		player->position.x + (PLAYER_SIZE * 6 / 7) * sin(-player->angle + M_PI * 45 / 180), player->position.y + (PLAYER_SIZE * 6 / 7) * cos(-player->angle + M_PI * 45 / 180),
-		player->position.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->position.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
-	al_draw_filled_triangle(player->position.x + (PLAYER_SIZE / 5) * sin(-player->angle), player->position.y + (PLAYER_SIZE / 5) * cos(-player->angle),
-		player->position.x - (PLAYER_SIZE * 6 / 7) * sin(player->angle + M_PI * 45 / 180), player->position.y + (PLAYER_SIZE * 6 / 7) * cos(player->angle + M_PI * 45 / 180),
-		player->position.x - (PLAYER_SIZE * 4 / 5) * sin(player->angle + M_PI), player->position.y + (PLAYER_SIZE * 4 / 5) * cos(player->angle + M_PI), al_map_rgb(0, 0, 0));
-	//rysowanie
-	float hpbarW = 28;
-	float hpbarH = 4;
-	al_draw_filled_rectangle(player->position.x - hpbarW / 2, player->position.y - PLAYER_SIZE - 5 - hpbarH, player->position.x + hpbarW / 2, player->position.y - PLAYER_SIZE - 5, al_map_rgb(0, 0, 0));
-	al_draw_filled_rectangle(player->position.x - hpbarW / 2, player->position.y - PLAYER_SIZE - 5 - hpbarH, player->position.x - hpbarW / 2 + hpbarW * player->health, player->position.y - PLAYER_SIZE - 5, al_map_rgb(0, 200, 0));
 
-}
 
-//funkcja do rysowanja pociskow
-//KLIENT
-void drawBullet(Bullet_t* bullet) {
-	al_draw_filled_circle(bullet->position.x, bullet->position.y, BULLET_SIZE, al_map_rgb(0, 0, 0));
-}
 
-//funkcyjka do rysowania calej planszy
-//tutaj jeszcze trzeba bedzie dodac scoreboard i pociski itd
-//KLIENT
-void drawBoard(Board_t* board, ALLEGRO_FONT* font) {
-	ListElem_t* currElem;
-	al_clear_to_color(al_map_rgb(20, 80, 150));
-
-	if (board->players->isAllocated != 0) {
-		currElem = board->players->head;
-		while (currElem != NULL) {
-			drawPlayer((Player_t*)(currElem->data), font);
-			currElem = currElem->next;
-		}
-	}
-
-	if (board->bullets->isAllocated != 0) {
-		currElem = board->bullets->head;
-		while (currElem != NULL) {
-			drawBullet((Bullet_t*)(currElem->data));
-			currElem = currElem->next;
-		}
-	}
-
-	al_flip_display();
-}
 
 
 const char* insertNick() {
@@ -146,6 +103,63 @@ const char* insertNick() {
 }
 
 
+const char* insertIP() {
+	ALLEGRO_DISPLAY *okno = al_create_display(250, 80);
+	al_set_window_title(okno, "IP");
+	ALLEGRO_FONT* font8 = al_create_builtin_font();
+
+	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+	al_register_event_source(queue, al_get_display_event_source(okno));
+	al_register_event_source(queue, al_get_keyboard_event_source());
+	ALLEGRO_EVENT event;
+
+	const char* wprowadz = "Wprowadz IP serwera";
+	char* ip = (char*)malloc((16 + 3 + 1) * sizeof(char));
+	ip[0] = '\0';
+	int iplen = 0;
+
+	al_draw_rectangle(45, 38, 210, 52, al_map_rgb(255, 255, 255), 2);
+	al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+	al_flip_display();
+
+	bool running = true;
+	while (running) {
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 50, 42, 0, ip);
+		al_draw_rectangle(45, 38, 210, 52, al_map_rgb(255, 255, 255), 2);
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+
+		al_wait_for_event(queue, &event);
+		if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+			if (event.keyboard.keycode == ALLEGRO_KEY_BACKSPACE) {
+				iplen -= 1;
+				ip[iplen] = '\0';
+			}
+			else if (event.keyboard.keycode >= ALLEGRO_KEY_0 && event.keyboard.keycode <= ALLEGRO_KEY_9) {
+				if (iplen < 20) {
+					ip[iplen] = (char)(event.keyboard.keycode - ALLEGRO_KEY_0 + '0');
+					iplen += 1;
+					ip[iplen] = '\0';
+				}
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_FULLSTOP) {
+				if (iplen < 20) {
+					ip[iplen] = '.';
+					iplen += 1;
+					ip[iplen] = '\0';
+				}
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)
+				running = false;
+		}
+		al_flip_display();
+	}
+
+	al_destroy_display(okno);
+	return ip;
+}
+
+
 int main(int argc, char* argv[]) {
 
 	//inicjalizacji w bród
@@ -165,7 +179,8 @@ int main(int argc, char* argv[]) {
 	al_install_keyboard();
 	al_install_mouse();
 
-	const char* nick = insertNick(font);
+	const char* nick = insertNick();
+	const char* ip = insertIP();
 
 	display = al_create_display(BOARD_SIZE_X, BOARD_SIZE_Y);
 	if (!display) {
@@ -205,7 +220,7 @@ int main(int argc, char* argv[]) {
 	while (running) {
 		ALLEGRO_EVENT event;
 
-		drawBoard(board, font);
+		draw_board(board, font);
 		al_wait_for_event(queue, &event);
 		// to tutaj jest do zmiany - obliczenia beda wykonywane po stronie servera, a po kazdym evencie bedzie wysyłany sygnal
 		// to jest wersja testowa w sumie

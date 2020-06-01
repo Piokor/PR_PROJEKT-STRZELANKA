@@ -1,5 +1,5 @@
 #include <math.h>
-#include <Winsock.h>
+#include <Winsock2.h>
 #include "GameShared.h"
 #include "ServerGame.h"
 
@@ -81,4 +81,38 @@ SrvGameData_t* init_srv_game_data() {
 	sGD->srvBoard = init_board();
 
 	return sGD;
+}
+
+
+void update_immortal_timers(Board_t* board) {
+	if (board->players->isAllocated != 0) {
+		ListElem_t* currElem = board->players->head;
+		Player_t* player = NULL;
+		while (currElem != NULL) {
+			player = (Player_t*)(currElem->data);
+			if (player->immortalTime > 0) {
+				player->immortalTime -= (1.0 / FPS);
+			}
+			else if (player->immortalTime < 0) {
+				player->immortalTime = 0;
+			}
+		}
+	}
+}
+
+
+BoardPacked_t* pack_board(Board_t* board) {
+	BoardPacked_t* boardPacked = (BoardPacked_t*)malloc(sizeof(BoardPacked_t));
+	BulletPacked_t* packedBullets = pack_bullet_list(board->bullets);
+	Player_t* packedPlayers = pack_player_list(board->players);
+
+	(boardPacked->bytes)[0] = sizeof(Player_t) * board->players->elementAmount;
+	(boardPacked->bytes)[1] = sizeof(Bullet_t) * board->bullets->elementAmount;
+	boardPacked->data = (char*)malloc((boardPacked->bytes)[0] + (boardPacked->bytes)[1]);
+	memcpy(boardPacked->data, packedPlayers, (boardPacked->bytes)[0]);
+	memcpy(boardPacked->data + (boardPacked->bytes)[0], packedBullets, (boardPacked->bytes)[1]);
+
+	free(packedBullets);
+	free(packedPlayers);
+	return boardPacked;
 }
