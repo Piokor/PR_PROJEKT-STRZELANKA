@@ -1,3 +1,5 @@
+#include <math.h>
+#include <Winsock.h>
 #include "Game.h"
 #include "ServerGame.h"
 
@@ -51,15 +53,6 @@ void check_colisions(Board* board) {
 }
 
 
-Bullet* init_bullet(Cord position, float angle, Player* shooter) {
-	Bullet* b = (Bullet*)malloc(sizeof(Bullet));
-	b->position = position;
-	b->angle = angle;
-	b->shooter = shooter;
-	return b;
-}
-
-
 void shoot(Player* shooter, Board* board){
 	Bullet* bullet = init_bullet(shooter->position, M_PI - shooter->angle, shooter);
 
@@ -70,19 +63,11 @@ void shoot(Player* shooter, Board* board){
 }
 
 
-Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color) {
-	Player* p = (Player*)calloc(1, sizeof(Player));  // inicjuje zerami - nie trzeba ustawiaæ score i angle na zero
+SrvGameData_t* init_srv_game_data() {
+	SrvGameData_t* sGD = (SrvGameData_t*)malloc(sizeof(SrvGameData_t));
 
-	int i = 0;
-	char c = nick[0];
-	while (c != '\0' && i != NICK_LEN) {
-		p->nick[i++] = nick[i];
-		c = nick[i];
-	}
+	sGD->boardMutex = CreateMutex(NULL, FALSE, NULL);
+	sGD->srvBoard = init_board();
 
-	p->position = position;
-	p->color = color;
-	p->health = 1;
-
-	return p;
+	return sGD;
 }

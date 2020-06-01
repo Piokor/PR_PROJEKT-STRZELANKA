@@ -2,9 +2,6 @@
 #define PR_LIST_H
 
 
-#include "Game.h"
-
-
 typedef struct ListElem {
 	struct ListElem* prev;
 	void* data;
@@ -30,7 +27,7 @@ ListElem_t* insert_head(ListHandle_t* list, void* data);
 ListElem_t* insert_beginning(ListHandle_t* list, void* data);
 ListElem_t* insert_end(ListHandle_t* list, void* data);
 ListElem_t* remove_elem(ListHandle_t* list, ListElem_t* elem);
-ListHandle_t* init_list_handle(void(*dataFreer)(void*), int(*dataComparator)(void*, void*));
+ListHandle_t* init_list_handle(void(*dataFreer)(void*), int(*dataComparator)(void*, void*), unsigned dataSize);
 
 
 #endif

@@ -5,12 +5,14 @@
 #include <WinSock2.h>
 #include "ServerGame.h"
 #include "Game.h"
+#include "List.h"
 
 
 #define PORT "1337"
 
 
 typedef struct SrvThreads {
+	HANDLE mainThread;
 	HANDLE threadRecv;
 	HANDLE threadSnd;
 }SrvThreads_t;
@@ -19,17 +21,20 @@ typedef struct SrvThreads {
 typedef struct SrvConnInfo {
 	ADDRINFOA* addrInfo;
 	SOCKET socket;
-	union {
-		SrvThreads_t threads;
-		HANDLE thread;
-	};
 }SrvConnInfo_t;
+
+
+typedef struct SrvMutexes {
+	HANDLE boardMutex;
+	HANDLE sendMutex;
+}SrvMutexes_t;
 
 
 typedef struct ShooterServer {
 	SrvConnInfo_t srvInfo;
-	unsigned connectedPlayers;
-	SrvConnInfo_t* playerConnections;
+	ListHandle_t* playerConnections;
+	SrvThreads_t threads;
+	SrvMutexes_t mutexes;
 	SrvGameData_t* gameData;
 }ShooterServer_t;
 

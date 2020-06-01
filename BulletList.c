@@ -39,3 +39,26 @@ int data_comparator_bullet(void* firstBulletData, void* secondBulletData){
 ListHandle_t* init_list_handle_bullet() {
 	return init_list_handle(free, data_comparator_bullet);
 }
+
+
+BulletPacked_t* pack_bullet_list(ListHandle_t* list) {
+	if (list->isAllocated != 0) {
+		BulletPacked_t* bulletsPacked = (BulletPacked_t*)malloc(sizeof(BulletPacked_t) * list->elementAmount);
+		Bullet* bullet = NULL;
+		ListElem_t* currElem = list->head;
+		unsigned bNum = 0;
+
+		while (currElem != NULL) {
+			bullet = (Bullet*)(currElem->data);
+			bulletsPacked[bNum].angle = bullet->angle;
+			bulletsPacked[bNum].position = bullet->position;
+			bulletsPacked[bNum++].shooter = *(bullet->shooter);
+			currElem = currElem->next;
+		}
+
+		return bulletsPacked;
+	}
+	else {
+		return NULL;
+	}
+}

@@ -2,17 +2,19 @@
 #define PR_SERVERGAME_H
 
 
-#include <WinSock2.h>
 #include "Game.h"
 
 
 typedef struct SrvGameData {
 	Board* srvBoard;
-	HANDLE boardMutex;
+	void* boardMutex;
 }SrvGameData_t;
 
 
-Board* init_board();
+void update_bullets(Board* board);
+void check_colisions(Board* board);
+void shoot(Player* shooter, Board* board);
+SrvGameData_t* init_srv_game_data();
 
 
 #endif

@@ -4,6 +4,10 @@
 #include <math.h>
 #include "Game.h"
 
+int main() {
+	return 0;
+}
+/*
 
 //funkcyjka do narysowania jednego gracza
 //do zrobienia rysowanie nicku
@@ -168,3 +172,4 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+*/

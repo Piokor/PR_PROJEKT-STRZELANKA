@@ -33,3 +33,22 @@ int data_comparator_player(void* firstPlayerData, void* secondPlayerData){
 ListHandle_t* init_list_handle_player() {
 	return init_list_handle(free, data_comparator_player);
 }
+
+
+Player* pack_player_list(ListHandle_t* list) {
+	if (list->isAllocated != 0) {
+		Player* playersPacked = (Player*)malloc(sizeof(Player) * list->elementAmount);
+		ListElem_t* currElem = list->head;
+		unsigned playerNum = 0;
+		
+		while (currElem != NULL) {
+			playersPacked[playerNum++] = *((Player*)(currElem->data));
+			currElem = currElem->next;
+		}
+
+		return playersPacked;
+	}
+	else {
+		return NULL;
+	}
+}

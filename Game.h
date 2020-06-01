@@ -3,7 +3,7 @@
 
 
 #include <allegro5/allegro.h>
-#include "BulletList.h"
+#include "List.h"
 
 
 #define M_PI 3.14159265358979323846
@@ -32,13 +32,13 @@
 #define BULLET_DAMAGE 0.25
 
 
-typedef struct {
+typedef struct Coord {
 	float x;
 	float y;
 } Cord;
 
 
-typedef struct {
+typedef struct Player{
 	char nick[NICK_LEN];
 	int score;
 	Cord position;
@@ -48,17 +48,30 @@ typedef struct {
 }Player;
 
 
-typedef struct {
+typedef struct Bullet{
 	Cord position;
 	float angle;
 	Player* shooter;
 }Bullet;
 
 
-typedef struct {
+typedef struct Board{
 	ListHandle_t* players;
 	ListHandle_t* bullets;
 }Board;
+
+
+typedef struct BoardPacked{
+	Player playersPacked;
+	BulletPacked_t bulletsPacked;
+	unsigned bytes;
+}BoardPacked_t;
+
+
+Board* init_board();
+Bullet* init_bullet(Cord position, float angle, Player* shooter);
+Player* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
+BoardPacked_t* pack_board(Board* board);
 
 
 #endif

@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "ServerConnection.h"
 #include "Game.h"
+#include "List.h"
+#include "PlayerConnectionList.h"
+#include "ServerGame.h"
 #pragma comment(lib, "Ws2_32.lib")
 
 
@@ -12,7 +15,7 @@ void server_critical_error() {
 }
 
 
-DWORD WINAPI _srv_start_player_thread_rcv(LPVOID params) {
+DWORD WINAPI _srv_start_thread_rcv(LPVOID params) {
 	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
 	char buf[256];
 	while (recv(playerConn->socket, buf, sizeof(buf), 0) > 0) {
@@ -22,14 +25,27 @@ DWORD WINAPI _srv_start_player_thread_rcv(LPVOID params) {
 }
 
 
-DWORD WINAPI _srv_start_player_thread_snd(LPVOID params) {
-	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
-	char msg[] = "Siema eniu!";
-	int read = 0;
+DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
+	ShooterServer_t* srv = (ShooterServer_t*)params;
+	ListElem_t* currConnection = NULL;
+	SrvConnInfo_t* connInfo = NULL;
+	BoardPacked_t* dataToSend = NULL;
+
 	for (;;) {
-		Sleep(3500);
-		send(playerConn->socket, msg, sizeof(msg), 0);
+		WaitForSingleObject(srv->mutexes.sendMutex, INFINITE);
+
+		WaitForSingleObject(srv->mutexes.boardMutex, INFINITE);
+		dataToSend = pack_board(srv->gameData->srvBoard);
+		ReleaseMutex(srv->mutexes.boardMutex);
+
+		currConnection = srv->playerConnections->head;
+		while (currConnection != NULL) {
+			connInfo = (SrvConnInfo_t*)(currConnection->data);
+			send(connInfo->socket, (char*)dataToSend, dataToSend->bytes, 0);
+			currConnection = currConnection->next;
+		}
 	}
+
 	return TRUE;
 }
 
@@ -43,19 +59,20 @@ DWORD WINAPI _srv_start_main_thread(LPVOID params) {
 	}
 
 	for (;;) {
-		SrvConnInfo_t* newPlayerConn = &((srv->playerConnections)[(srv->connectedPlayers)++]);
+		SrvConnInfo_t* newPlayerConn = malloc(sizeof(SrvConnInfo_t));
+
 		newPlayerConn->socket = accept(srv->srvInfo.socket, 
 			newPlayerConn->addrInfo->ai_addr, &(newPlayerConn->addrInfo->ai_addrlen));
-		newPlayerConn->threads.threadRecv = CreateThread(NULL, 0,
-			(LPTHREAD_START_ROUTINE)_srv_start_player_thread_rcv, (LPVOID)newPlayerConn, 0, NULL);
-		newPlayerConn->threads.threadSnd = CreateThread(NULL, 0,
-			(LPTHREAD_START_ROUTINE)_srv_start_player_thread_snd, (LPVOID)newPlayerConn, 0, NULL);
+
+		WaitForSingleObject(srv->mutexes.boardMutex, INFINITE);  // MUTEX (BINARNY SEMAFOR)
+		insert_end(srv->playerConnections, newPlayerConn);
+		ReleaseMutex(srv->mutexes.boardMutex);
 	}
 }
 
 
 void start_server(ShooterServer_t* srv) {
-	srv->srvInfo.thread = CreateThread(NULL, 0, 
+	srv->threads.mainThread = CreateThread(NULL, 0, 
 		(LPTHREAD_START_ROUTINE)_srv_start_main_thread, (LPVOID)srv, 0, NULL);
 }
 
@@ -82,7 +99,10 @@ ShooterServer_t* create_server() {
 
 	srv->srvInfo.addrInfo = addrInfo;
 	srv->srvInfo.socket = mainRecSocket;
-	srv->playerConnections = (SrvConnInfo_t*)malloc(sizeof(SrvConnInfo_t) * PLAYERS_LIMIT);
-	srv->connectedPlayers = 0;
+	srv->playerConnections = init_list_handle_pcn();
+	srv->gameData = init_srv_game_data();
+	srv->mutexes.boardMutex = CreateMutex(NULL, FALSE, NULL);
+	srv->mutexes.sendMutex = CreateMutex(NULL, TRUE, NULL);
+
 	return srv;
 }

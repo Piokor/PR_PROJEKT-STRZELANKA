@@ -106,11 +106,12 @@ ListElem_t* remove_elem(ListHandle_t* list, ListElem_t* elem) {
 }
 
 
-ListHandle_t* init_list_handle(void(*dataFreer)(void*), int(*dataComparator)(void*, void*)) {
+ListHandle_t* init_list_handle(void(*dataFreer)(void*), int(*dataComparator)(void*, void*), unsigned dataSize) {
 	ListHandle_t* handle = (ListHandle_t*)malloc(sizeof(ListHandle_t));
 	handle->dataComparator = dataComparator;
 	handle->dataFreer = dataFreer;
 	handle->elementAmount = 0;
 	handle->isAllocated = 0;
+
 	return handle;
 }
