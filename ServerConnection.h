@@ -25,17 +25,11 @@ typedef struct SrvConnInfo {
 }SrvConnInfo_t;
 
 
-typedef struct SrvMutexes {
-	HANDLE boardMutex;
-	HANDLE sendMutex;
-}SrvMutexes_t;
-
-
 typedef struct ShooterServer {
 	SrvConnInfo_t srvInfo;
 	ListHandle_t* playerConnections;
 	SrvThreads_t threads;
-	SrvMutexes_t mutexes;
+	HANDLE boardMutex;
 	SrvGameData_t* gameData;
 }ShooterServer_t;
 

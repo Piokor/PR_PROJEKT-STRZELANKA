@@ -129,6 +129,51 @@ BoardPacked_t* pack_board(Board_t* board) {
 }
 
 
-void parse_event(ALLEGRO_EVENT* event, Board_t* board, char* nick) {
+void parse_event(ALLEGRO_EVENT event, Board_t* board, char* nick) {
 	Player_t* player = find_player_by_nick(board->players, nick);
+
+	if (event.type == ALLEGRO_EVENT_MOUSE_AXES) {
+		float x = event.mouse.x - player->position.x;
+		float y = event.mouse.y - player->position.y;
+		float poprawka = M_PI;
+		if (x >= 0) poprawka = 0;
+		float angle = atan(y / x) + M_PI / 2 + poprawka;
+		player->angle = angle;
+
+	}
+	else if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && player->immortalTime == 0) {
+		shoot(player, board);
+	}
+	else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+		switch (event.keyboard.keycode) {
+		case ALLEGRO_KEY_UP:
+			player->keys[UP] = 1;
+			break;
+		case ALLEGRO_KEY_DOWN:
+			player->keys[DOWN] = 1;
+			break;
+		case ALLEGRO_KEY_LEFT:
+			player->keys[LEFT] = 1;
+			break;
+		case ALLEGRO_KEY_RIGHT:
+			player->keys[RIGHT] = 1;
+			break;
+		}
+	}
+	else if (event.type == ALLEGRO_EVENT_KEY_UP) {
+		switch (event.keyboard.keycode) {
+		case ALLEGRO_KEY_UP:
+			player->keys[UP] = 0;
+			break;
+		case ALLEGRO_KEY_DOWN:
+			player->keys[DOWN] = 0;
+			break;
+		case ALLEGRO_KEY_LEFT:
+			player->keys[LEFT] = 0;
+			break;
+		case ALLEGRO_KEY_RIGHT:
+			player->keys[RIGHT] = 0;
+			break;
+		}
+	}
 }

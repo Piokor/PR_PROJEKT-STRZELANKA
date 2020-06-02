@@ -12,20 +12,27 @@
 
 
 DWORD WINAPI _srv_start_thread_rcv(LPVOID params) {
-	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
+	ShooterServer_t* srv = (ShooterServer_t*)params;
+	ListElem_t* playerConnElem;
+	SrvConnInfo_t* playerConn;
 	unsigned bytesReceived = 0;
 	Package_t eventPackage;
 
 	for (;;) {
-		while (bytesReceived != sizeof(Package_t)) {
-			bytesReceived += recv(playerConn->socket,
-				(char*)(&eventPackage) + bytesReceived, sizeof(Package_t) - bytesReceived, 0);
+		if (srv->playerConnections->isAllocated) {
+			playerConnElem = srv->playerConnections->head;
+			while(playerConn != NULL){
+				playerConn = (SrvConnInfo_t*)(playerConnElem->data);
+				while (bytesReceived != sizeof(Package_t)) {
+					bytesReceived += recv(playerConn->socket,
+						(char*)(&eventPackage) + bytesReceived, sizeof(Package_t) - bytesReceived, 0);
+				}
+				parse_event(&(eventPackage.event), srv->gameData->srvBoard, playerConn->playerNick);
+				bytesReceived = 0;
+				playerConnElem = playerConnElem->next;
+			}
 		}
-
-		bytesReceived = 0;
 	}
-
-
 	return TRUE;
 }
 
@@ -36,12 +43,21 @@ DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
 	SrvConnInfo_t* connInfo = NULL;
 	BoardPacked_t* dataToSend = NULL;
 
-	for (;;) {
-		WaitForSingleObject(srv->mutexes.sendMutex, INFINITE);
+	if (!al_init()) {
+		fprintf(stderr, "failed to initialize allegro!\n");
+		return -1;
+	}
+	ALLEGRO_EVENT event;
+	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+	ALLEGRO_TIMER* timer = al_create_timer(0.001 * SRV_REFRESH_TIME_MS);
+	al_register_event_source(queue, al_get_timer_event_source(timer));
+	al_start_timer(timer);
 
-		WaitForSingleObject(srv->mutexes.boardMutex, INFINITE);
+	for (;;) {
+		al_wait_for_event(queue, &event);
+		WaitForSingleObject(srv->boardMutex, INFINITE);
 		dataToSend = pack_board(srv->gameData->srvBoard);
-		ReleaseMutex(srv->mutexes.boardMutex);
+		ReleaseMutex(srv->boardMutex);
 
 		currConnection = srv->playerConnections->head;
 		while (currConnection != NULL) {
@@ -50,6 +66,8 @@ DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
 			send(connInfo->socket, (char*)(dataToSend->data), (dataToSend->bytes)[0] + (dataToSend->bytes)[1], 0);
 			currConnection = currConnection->next;
 		}
+
+		free(dataToSend->data);
 	}
 
 	return TRUE;
@@ -57,6 +75,8 @@ DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
 
 
 void start_server(ShooterServer_t* srv) {
+	static DWORD nonBlock = 1;
+
 	if (bind(srv->srvInfo.socket, srv->srvInfo.addrInfo->ai_addr, (int)srv->srvInfo.addrInfo->ai_addrlen) == SOCKET_ERROR ||
 		listen(srv->srvInfo.socket, PLAYERS_LIMIT) == SOCKET_ERROR) {
 		shutdown(srv->srvInfo.socket, SD_BOTH);
@@ -70,6 +90,7 @@ void start_server(ShooterServer_t* srv) {
 
 		newPlayerConn->socket = accept(srv->srvInfo.socket,
 			newPlayerConn->addrInfo->ai_addr, &(newPlayerConn->addrInfo->ai_addrlen));
+		ioctlsocket(newPlayerConn->socket, FIONBIO, &nonBlock);
 
 		while (bytesReceivedNick != sizeof(Package_t)) {
 			bytesReceivedNick += recv(newPlayerConn->socket, 
@@ -77,9 +98,9 @@ void start_server(ShooterServer_t* srv) {
 		}
 		strcpy(newPlayerConn->playerNick, nickPackage.nick);
 
-		WaitForSingleObject(srv->mutexes.boardMutex, INFINITE);  // MUTEX (BINARNY SEMAFOR)
+		WaitForSingleObject(srv->boardMutex, INFINITE);  // MUTEX (BINARNY SEMAFOR)
 		insert_end(srv->playerConnections, newPlayerConn);
-		ReleaseMutex(srv->mutexes.boardMutex);
+		ReleaseMutex(srv->boardMutex);
 	}
 }
 

@@ -8,7 +8,7 @@
 #include "List.h"
 
 
-#define CLNTPORT "1337"
+#define CLNTPORT "1338"
 
 
 typedef struct ClientConnection {
