@@ -21,7 +21,7 @@ DWORD WINAPI _srv_start_thread_rcv(LPVOID params) {
 	for (;;) {
 		if (srv->playerConnections->isAllocated) {
 			playerConnElem = srv->playerConnections->head;
-			while(playerConn != NULL){
+			while(playerConnElem != NULL){
 				playerConn = (SrvConnInfo_t*)(playerConnElem->data);
 				while (bytesReceived != sizeof(Package_t)) {
 					bytesReceived += recv(playerConn->socket,
@@ -129,8 +129,7 @@ ShooterServer_t* create_server() {
 	srv->srvInfo.socket = mainRecSocket;
 	srv->playerConnections = init_list_handle_pcn();
 	srv->gameData = init_srv_game_data();
-	srv->mutexes.boardMutex = CreateMutex(NULL, FALSE, NULL);
-	srv->mutexes.sendMutex = CreateMutex(NULL, TRUE, NULL);
+	srv->boardMutex = CreateMutex(NULL, FALSE, NULL);
 
 	return srv;
 }
