@@ -2,9 +2,42 @@
 #include <Winsock2.h>
 #include <ws2tcpip.h>
 #include "ClientConnection.h"
+#include "ClientGame.h"
 
 
+/*typedef struct {
+	char* nick;
+	ALLEGRO_EVENT event;
+} Message;
 
+typedef  struct {
+	char* nick;
+	ALLEGRO_EVENT_QUEUE* queue;
+} Klient_dane;
+
+
+void sendMessage(Message message) {};
+
+DWORD WINAPI wysylanie(void* args) {
+	Klient_dane* dane = (Klient_dane*)args;
+	ALLEGRO_EVENT_QUEUE* queue = dane->queue;
+	char* nick = dane->nick;
+
+	bool running = true;
+	while (running) {
+		ALLEGRO_EVENT event;
+
+		al_wait_for_event(queue, &event);
+
+		if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.type == ALLEGRO_KEY_ESCAPE)
+			running = false;
+
+		if (event.type == ALLEGRO_EVENT_MOUSE_AXES || event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN || event.type == ALLEGRO_EVENT_KEY_DOWN || event.type == ALLEGRO_EVENT_KEY_UP) {
+			Message message = (Message) { nick, event };
+			sendMessage(message);
+		}
+	}
+}*/
 
 
 DWORD WINAPI _clnt_start_thread_recv(LPVOID params) {
@@ -20,6 +53,8 @@ DWORD WINAPI _clnt_start_thread_recv(LPVOID params) {
 			bytesReceived += recv(conn->socket, data + bytesReceived, byteSum - bytesReceived, 0);
 		}
 	}
+
+	Board_t* board = unpack_board(data, bytesToBeReceived[1], bytesToBeReceived[0]);
 }
 
 

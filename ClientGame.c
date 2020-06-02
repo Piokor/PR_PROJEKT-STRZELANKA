@@ -69,6 +69,130 @@ void draw_board(Board_t* board, ALLEGRO_FONT* font) {
 }
 
 
-void unpack_board() {
+const char* insertNick() {
+	ALLEGRO_FONT *font8 = al_create_builtin_font();
+	ALLEGRO_DISPLAY *okno = al_create_display(200, 80);
+	al_set_window_title(okno, "Nick");
 
+	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+	al_register_event_source(queue, al_get_display_event_source(okno));
+	al_register_event_source(queue, al_get_keyboard_event_source());
+	ALLEGRO_EVENT event;
+
+	const char* wprowadz = "Wprowadz nick";
+	char* nick = (char*)malloc(NICK_LEN * sizeof(char));
+	nick[0] = '\0';
+	int nicklen = 0;
+
+	al_draw_rectangle(45, 38, 160, 52, al_map_rgb(255, 255, 255), 2);
+	al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+	al_flip_display();
+
+	bool running = true;
+	while (running) {
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 50, 42, 0, nick);
+		al_draw_rectangle(45, 38, 160, 52, al_map_rgb(255, 255, 255), 2);
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+
+		al_wait_for_event(queue, &event);
+		if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+
+			if (event.keyboard.keycode >= ALLEGRO_KEY_A && event.keyboard.keycode <= ALLEGRO_KEY_Z) {
+				nick[nicklen] = (char)(event.keyboard.keycode - 1 + 'A');
+				nicklen += 1;
+				nick[nicklen] = '\0';
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_BACKSPACE) {
+				nicklen -= 1;
+				nick[nicklen] = '\0';
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)
+				running = false;
+		}
+		if (nicklen > 13)
+			running = false;
+		al_flip_display();
+	}
+
+	al_destroy_display(okno);
+	return nick;
+}
+
+
+const char* insertIP() {
+	ALLEGRO_DISPLAY *okno = al_create_display(250, 80);
+	al_set_window_title(okno, "IP");
+	ALLEGRO_FONT* font8 = al_create_builtin_font();
+
+	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+	al_register_event_source(queue, al_get_display_event_source(okno));
+	al_register_event_source(queue, al_get_keyboard_event_source());
+	ALLEGRO_EVENT event;
+
+	const char* wprowadz = "Wprowadz IP serwera";
+	char* ip = (char*)malloc((16 + 3 + 1) * sizeof(char));
+	ip[0] = '\0';
+	int iplen = 0;
+
+	al_draw_rectangle(45, 38, 210, 52, al_map_rgb(255, 255, 255), 2);
+	al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+	al_flip_display();
+
+	bool running = true;
+	while (running) {
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 50, 42, 0, ip);
+		al_draw_rectangle(45, 38, 210, 52, al_map_rgb(255, 255, 255), 2);
+		al_draw_text(font8, al_map_rgb(255, 255, 255), 45, 20, 0, wprowadz);
+
+		al_wait_for_event(queue, &event);
+		if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+			if (event.keyboard.keycode == ALLEGRO_KEY_BACKSPACE) {
+				iplen -= 1;
+				ip[iplen] = '\0';
+			}
+			else if (event.keyboard.keycode >= ALLEGRO_KEY_0 && event.keyboard.keycode <= ALLEGRO_KEY_9) {
+				if (iplen < 20) {
+					ip[iplen] = (char)(event.keyboard.keycode - ALLEGRO_KEY_0 + '0');
+					iplen += 1;
+					ip[iplen] = '\0';
+				}
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_FULLSTOP) {
+				if (iplen < 20) {
+					ip[iplen] = '.';
+					iplen += 1;
+					ip[iplen] = '\0';
+				}
+			}
+			else if (event.keyboard.keycode == ALLEGRO_KEY_ENTER)
+				running = false;
+		}
+		al_flip_display();
+	}
+
+	al_destroy_display(okno);
+	return ip;
+}
+
+
+Board_t* unpack_board(char* data, unsigned bulletsBytes, unsigned playersBytes) {
+	Board_t* board = init_board();
+	Player_t* playersData = (Player_t*)data;
+	Bullet_t* bulletsData = (Bullet_t*)(data + playersBytes);
+
+	while (playersBytes) {
+		insert_beginning_player(board->players, playersData);
+		playersData += sizeof(Player_t);
+		playersBytes -= sizeof(Player_t);
+	}
+
+	while (bulletsBytes) {
+		insert_beginning_bullet(board->bullets, bulletsData);
+		bulletsData += sizeof(Bullet_t);
+		bulletsBytes -= sizeof(Bullet_t);
+	}
+
+	return board;
 }

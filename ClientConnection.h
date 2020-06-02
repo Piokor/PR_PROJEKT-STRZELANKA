@@ -24,4 +24,11 @@ typedef struct ClientConnection {
 }ClientConnection_t;
 
 
+
+DWORD WINAPI _clnt_start_thread_recv(LPVOID params);
+DWORD WINAPI _clnt_start_thread_snd(LPVOID params);
+void connect_to_server(ClientConnection_t* conn);
+ClientConnection_t* create_client_connection(char* ip);
+
+
 #endif

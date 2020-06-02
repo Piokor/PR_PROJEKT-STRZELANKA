@@ -53,6 +53,7 @@ typedef struct Player{
 	struct ALLEGRO_COLOR color;
 	float health;
 	double immortalTime;
+	char* keys;
 }Player_t;
 
 

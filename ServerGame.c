@@ -27,6 +27,15 @@ void update_bullets(Board_t* board) {
 }
 
 
+void respawn_player(Player_t* player) {
+	player->health = 1.0;
+	int newSpawn = rand() % AMT_OF_REPSAWN_CORDS;
+	player->position.x = spawnCords[newSpawn].x;
+	player->position.y = spawnCords[newSpawn].y;
+	player->immortalTime = IMMORTAL_TIME;
+}
+
+
 void check_colisions(Board_t* board) {
 	ListElem_t* bulletElem, *playerElem = board->players->head;
 	Bullet_t* bullet = NULL;
@@ -45,7 +54,7 @@ void check_colisions(Board_t* board) {
 				player->health -= BULLET_DAMAGE;
 				if (player->health <= 0) {
 					bullet->shooter->score += POINTS_FOR_KILL;
-					playerElem = remove_elem(board->players, playerElem);
+					respawn_player(player);
 					playerDead = 1;
 					break;
 				}
