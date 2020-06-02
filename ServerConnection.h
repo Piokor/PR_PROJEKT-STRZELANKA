@@ -21,6 +21,7 @@ typedef struct SrvThreads {
 typedef struct SrvConnInfo {
 	ADDRINFOA* addrInfo;
 	SOCKET socket;
+	char playerNick[NICK_LEN];
 }SrvConnInfo_t;
 
 
@@ -37,6 +38,12 @@ typedef struct ShooterServer {
 	SrvMutexes_t mutexes;
 	SrvGameData_t* gameData;
 }ShooterServer_t;
+
+
+DWORD WINAPI _srv_start_thread_rcv(LPVOID params);
+DWORD WINAPI _srv_start_thread_snd(LPVOID params);
+void start_server(ShooterServer_t* srv);
+ShooterServer_t* create_server();
 
 
 #endif

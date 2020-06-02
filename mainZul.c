@@ -59,11 +59,11 @@ int main(int argc, char* argv[]) {
 
 	al_clear_to_color(al_map_rgb(20, 80, 150));
 
-	/*Cord c = { 350, 350 };
+	Cord c = { 350, 350 };
 	Player_t* mainPlayer = init_player(nick, c, al_map_rgb(100, 0, 0));
 	c = (Cord){ 100, 100 };
 	Player_t* debil = init_player("Jan", c, al_map_rgb(0, 100, 0));
-	float angle = 0;*/
+	float angle = 0;
 
 	char running = 1;
 	char keys[4] = { 0,0,0,0 };

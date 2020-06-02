@@ -23,6 +23,7 @@ ListElem_t* allocate_elem(ListElem_t* prev, ListElem_t* next, void* data);
 ListElem_t* find_elem(ListHandle_t* list, void* dataToFind);
 void free_elem(ListHandle_t* list, ListElem_t* elem);
 ListHandle_t* remove_head(ListHandle_t* list);
+ListHandle_t* remove_all_elems(ListHandle_t* list);
 ListElem_t* insert_head(ListHandle_t* list, void* data);
 ListElem_t* insert_beginning(ListHandle_t* list, void* data);
 ListElem_t* insert_end(ListHandle_t* list, void* data);

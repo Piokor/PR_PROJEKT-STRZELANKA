@@ -13,6 +13,15 @@ Board_t* init_board() {
 }
 
 
+void free_board(Board_t* board) {
+	remove_all_elems(board->bullets);
+	remove_all_elems(board->players);
+	free(board->bullets);
+	free(board->players);
+	free(board);
+}
+
+
 Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter) {
 	Bullet_t* b = (Bullet_t*)malloc(sizeof(Bullet_t));
 	b->position = position;

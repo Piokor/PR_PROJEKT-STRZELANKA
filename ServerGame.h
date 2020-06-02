@@ -5,6 +5,9 @@
 #include "GameShared.h"
 
 
+#define SRV_REFRESH_TIME_MS 10
+
+
 typedef struct SrvGameData {
 	Board_t* srvBoard;
 	void* boardMutex;

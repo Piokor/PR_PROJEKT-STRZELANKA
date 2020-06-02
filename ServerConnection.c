@@ -7,26 +7,25 @@
 #include "List.h"
 #include "PlayerConnectionList.h"
 #include "ServerGame.h"
+#include "ClientConnection.h"
 #pragma comment(lib, "Ws2_32.lib")
-
-
-void server_critical_error() {
-	printf("An error has occured! The server is shutting down...\n");
-}
 
 
 DWORD WINAPI _srv_start_thread_rcv(LPVOID params) {
 	SrvConnInfo_t* playerConn = (SrvConnInfo_t*)params;
-	unsigned partNumber, byteSum, bytesToBeReceived[2], bytesReceived = 0;
-	char *data, isReceivingData = 0;
-	while (recv(playerConn->socket, (char*)bytesToBeReceived, sizeof(unsigned) * 2, 0) > 0) {
-		byteSum = bytesToBeReceived[0] + bytesToBeReceived[1];
-		data = (char*)malloc(sizeof(byteSum));
-		bytesReceived = 0;
-		while (bytesReceived != byteSum) {
-			bytesReceived += recv(playerConn->socket, data + bytesReceived, byteSum - bytesReceived, 0);
+	unsigned bytesReceived = 0;
+	Package_t eventPackage;
+
+	for (;;) {
+		while (bytesReceived != sizeof(Package_t)) {
+			bytesReceived += recv(playerConn->socket,
+				(char*)(&eventPackage) + bytesReceived, sizeof(Package_t) - bytesReceived, 0);
 		}
+
+		bytesReceived = 0;
 	}
+
+
 	return TRUE;
 }
 
@@ -57,30 +56,31 @@ DWORD WINAPI _srv_start_thread_snd(LPVOID params) {
 }
 
 
-DWORD WINAPI _srv_start_main_thread(LPVOID params) {
-	ShooterServer_t* srv = (ShooterServer_t*)params;
+void start_server(ShooterServer_t* srv) {
 	if (bind(srv->srvInfo.socket, srv->srvInfo.addrInfo->ai_addr, (int)srv->srvInfo.addrInfo->ai_addrlen) == SOCKET_ERROR ||
 		listen(srv->srvInfo.socket, PLAYERS_LIMIT) == SOCKET_ERROR) {
 		shutdown(srv->srvInfo.socket, SD_BOTH);
-		return FALSE;
 	}
 
+	SrvConnInfo_t* newPlayerConn;
+	Package_t nickPackage;
+	unsigned bytesReceivedNick = 0;
 	for (;;) {
-		SrvConnInfo_t* newPlayerConn = malloc(sizeof(SrvConnInfo_t));
+		newPlayerConn = malloc(sizeof(SrvConnInfo_t));
 
-		newPlayerConn->socket = accept(srv->srvInfo.socket, 
+		newPlayerConn->socket = accept(srv->srvInfo.socket,
 			newPlayerConn->addrInfo->ai_addr, &(newPlayerConn->addrInfo->ai_addrlen));
+
+		while (bytesReceivedNick != sizeof(Package_t)) {
+			bytesReceivedNick += recv(newPlayerConn->socket, 
+				(char*)(&nickPackage) + bytesReceivedNick, sizeof(Package_t) - bytesReceivedNick, 0);
+		}
+		strcpy(newPlayerConn->playerNick, nickPackage.nick);
 
 		WaitForSingleObject(srv->mutexes.boardMutex, INFINITE);  // MUTEX (BINARNY SEMAFOR)
 		insert_end(srv->playerConnections, newPlayerConn);
 		ReleaseMutex(srv->mutexes.boardMutex);
 	}
-}
-
-
-void start_server(ShooterServer_t* srv) {
-	srv->threads.mainThread = CreateThread(NULL, 0, 
-		(LPTHREAD_START_ROUTINE)_srv_start_main_thread, (LPVOID)srv, 0, NULL);
 }
 
 

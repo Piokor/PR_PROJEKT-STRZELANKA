@@ -1,5 +1,7 @@
 #include <math.h>
 #include <Winsock2.h>
+#include "BulletList.h"
+#include "PlayerList.h"
 #include "GameShared.h"
 #include "ServerGame.h"
 
@@ -124,4 +126,9 @@ BoardPacked_t* pack_board(Board_t* board) {
 	free(packedBullets);
 	free(packedPlayers);
 	return boardPacked;
+}
+
+
+void parse_event(ALLEGRO_EVENT* event, Board_t* board, char* nick) {
+	Player_t* player = find_player_by_nick(board->players, nick);
 }

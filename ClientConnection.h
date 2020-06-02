@@ -11,24 +11,24 @@
 #define CLNTPORT "1337"
 
 
-typedef struct ClientThreads {
-	HANDLE threadRecv;
-	HANDLE threadSnd;
-}ClntThreads_t;
-
-
 typedef struct ClientConnection {
 	SOCKET socket;
 	ADDRINFOA* addrInfo;
-	ClntThreads_t threads;
+	HANDLE threadRecv;
+	char* nick;
 }ClientConnection_t;
 
+
+typedef union {
+	char nick[NICK_LEN];
+	ALLEGRO_EVENT event;
+}Package_t;
 
 
 DWORD WINAPI _clnt_start_thread_recv(LPVOID params);
 DWORD WINAPI _clnt_start_thread_snd(LPVOID params);
 void connect_to_server(ClientConnection_t* conn);
-ClientConnection_t* create_client_connection(char* ip);
+ClientConnection_t* create_client_connection(char* ip, char* nick);
 
 
 #endif

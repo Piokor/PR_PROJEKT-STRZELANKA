@@ -8,6 +8,15 @@ ListElem_t* find_elem_player(ListHandle_t* list, Player_t* player) {
 	return  find_elem(list, (void*)player);
 }
 
+
+Player_t* find_player_by_nick(ListHandle_t* list, char* nick) {
+	Player_t dummy;
+	strcpy(dummy.nick, nick);
+	ListElem_t* playerElem = find_elem_player(list, &dummy);
+	return (Player_t*)(playerElem->data);
+}
+
+
 ListElem_t* insert_beginning_player(ListHandle_t* list, Player_t* player) {
 	return insert_beginning(list, (void*)player);
 }

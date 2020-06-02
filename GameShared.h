@@ -84,6 +84,7 @@ typedef struct BoardPacked{
 
 
 Board_t* init_board();
+void free_board(Board_t* board);
 Bullet_t* init_bullet(Cord position, float angle, Player_t* shooter);
 Player_t* init_player(const char* nick, Cord position, ALLEGRO_COLOR color);
 
